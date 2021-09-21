@@ -1,3 +1,18 @@
-add_subdirectory(app)
-add_subdirectory(lcd_gui_qt)
-add_subdirectory(lcd_logic)
+find_package (Qt5Core QUIET)
+find_package (Qt5Gui QUIET)
+find_package (Qt5Widgets QUIET)
+
+if (NOT ${Qt5Gui_FOUND} OR NOT ${Qt5Core_FOUND} OR NOT ${Qt5Widgets_FOUND})
+	message ("QT5 not found. Disabling QT gui project")
+else ()
+	add_subdirectory (app)
+	add_subdirectory (lcd_gui_qt)
+endif ()
+
+add_subdirectory (lcd_logic)
+
+if (${BUILD_TESTS})
+	message ("Tests enabled")
+	enable_testing ()
+	add_subdirectory (test)
+endif ()

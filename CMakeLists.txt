@@ -3,11 +3,9 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("carui")
+option (BUILD_TESTS OFF)
 
-find_package (Qt5Core CONFIG REQUIRED)
-find_package (Qt5Gui CONFIG REQUIRED)
-find_package (Qt5Widgets CONFIG REQUIRED)
+project ("lcd")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
