@@ -4,7 +4,7 @@
 
 #include <stdafx.h>
 
-#include <assert.h>
+#include <lcd_assert.h>
 #include <qt_timer.h>
 
 namespace lcd
