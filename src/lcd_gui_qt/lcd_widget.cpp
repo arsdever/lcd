@@ -10,11 +10,7 @@ namespace lcd
 	{
 	}
 
-	void lcd_widget::handle_command(uint8_t command)
-	{
-	}
-
-	void lcd_widget::handle_data(uint8_t data) 
+	void lcd_widget::execute(execution_data const& data) 
 	{
 	}
 }

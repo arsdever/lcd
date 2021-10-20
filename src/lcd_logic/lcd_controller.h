@@ -5,7 +5,7 @@
 namespace lcd
 {
 	class lcd_controller;
-	using lcd_controller_ptr = std::shared_ptr<lcd_controller>;
+	using lcd_controller_ptr  = std::shared_ptr<lcd_controller>;
 	using lcd_controller_wptr = std::weak_ptr<lcd_controller>;
 
 	class lcd_controller
@@ -26,16 +26,16 @@ namespace lcd
 
 		enum class read_write_mode_enum
 		{
-			read,
-			write
+			write,
+			read
 		};
 
 		enum class cursor_direction_enum : bool
 		{
 			decrement = 0,
 			increment = 1,
-			left = decrement,
-			right = increment
+			left	  = decrement,
+			right	  = increment
 		};
 
 		enum class command_types_enum
@@ -73,27 +73,34 @@ namespace lcd
 			catode
 		};
 
+		struct execution_data
+		{
+			read_write_mode_enum rw_mode;
+			registers_mode_enum	 rs_mode;
+			uint8_t				 data;
+		};
+
 		inline static constexpr std::string pin_name(pinout p)
 		{
 			switch (p)
-			{
-			case pinout::ground: return "ground";
-			case pinout::vcc: return "vcc";
-			case pinout::v0: return "v0";
-			case pinout::rs: return "rs";
-			case pinout::rw: return "rw";
-			case pinout::en: return "en";
-			case pinout::data0: return "data0";
-			case pinout::data1: return "data1";
-			case pinout::data2: return "data2";
-			case pinout::data3: return "data3";
-			case pinout::data4: return "data4";
-			case pinout::data5: return "data5";
-			case pinout::data6: return "data6";
-			case pinout::data7: return "data7";
-			case pinout::anode: return "anode";
-			case pinout::catode: return "catode";
-			}
+				{
+				case pinout::ground: return "ground";
+				case pinout::vcc: return "vcc";
+				case pinout::v0: return "v0";
+				case pinout::rs: return "rs";
+				case pinout::rw: return "rw";
+				case pinout::en: return "en";
+				case pinout::data0: return "data0";
+				case pinout::data1: return "data1";
+				case pinout::data2: return "data2";
+				case pinout::data3: return "data3";
+				case pinout::data4: return "data4";
+				case pinout::data5: return "data5";
+				case pinout::data6: return "data6";
+				case pinout::data7: return "data7";
+				case pinout::anode: return "anode";
+				case pinout::catode: return "catode";
+				}
 		}
 
 		using on_update_delegate = std::function<void()>;
@@ -104,32 +111,33 @@ namespace lcd
 		lcd_controller();
 		virtual ~lcd_controller() = default;
 
-		void register_for_updates(on_update_delegate callback);
-		char& symbol_at_ddram(size_t address);
+		void		register_for_updates(on_update_delegate callback);
+		char&		symbol_at_ddram(size_t address);
 		const char& symbol_at_ddram(size_t address) const;
 
 	protected:
 		virtual void port_updated_callback(pinout p);
-		virtual void handle_command(uint8_t command);
-		virtual void handle_command(command_types_enum command);
-		virtual void handle_data(uint8_t data);
+		virtual void execute(execution_data const& data);
+
+	private:
+		void on_enable_falling_edge();
 
 	public:
-		port<16> m_port;
-		interface_type_enum m_interface_type;
-		on_update_delegate m_on_update_cb;
-		size_t m_hscroll;
-		size_t m_vscroll;
-		bool m_cursor_show;
+		port<16>			  m_port;
+		interface_type_enum	  m_interface_type;
+		on_update_delegate	  m_on_update_cb;
+		size_t				  m_hscroll;
+		size_t				  m_vscroll;
+		bool				  m_cursor_show;
 		cursor_direction_enum m_cursor_move_direction;
-		bool m_insert;
-		bool m_blink;
-		std::atomic<bool> m_busy;
-		bool m_display_on;
-		bool m_lines;
-		bool m_font;
-		bool m_scroll_direction;
-		size_t m_ddram_address_counter;
-		std::array<char, 80> m_ddram;
+		bool				  m_insert;
+		bool				  m_blink;
+		std::atomic<bool>	  m_busy;
+		bool				  m_display_on;
+		bool				  m_lines;
+		bool				  m_font;
+		bool				  m_scroll_direction;
+		size_t				  m_ddram_address_counter;
+		std::array<char, 80>  m_ddram;
 	};
-}
+} // namespace lcd
