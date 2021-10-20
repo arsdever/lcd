@@ -21,7 +21,7 @@ namespace lcd
 			{ lcd_controller::command_types_enum::function_set, std::chrono::microseconds { 37 } },
 			{ lcd_controller::command_types_enum::set_cgram_address, std::chrono::microseconds { 37 } },
 			{ lcd_controller::command_types_enum::set_ddram_address, std::chrono::microseconds { 37 } },
-			{ lcd_controller::command_types_enum::read_busy_flag_and_address, std::chrono::microseconds { 37 } },
+			{ lcd_controller::command_types_enum::read_busy_flag_and_address, std::chrono::microseconds { 0 } },
 			{ lcd_controller::command_types_enum::write_data_to_cg_or_ddram, std::chrono::microseconds { 37 } },
 			{ lcd_controller::command_types_enum::read_data_from_cg_or_ddram, std::chrono::microseconds { 37 } },
 		};
@@ -33,74 +33,72 @@ namespace lcd
 		  m_scroll_direction { false }, m_ddram { 0 }
 	{
 		m_port.m_pins[ static_cast<int>(pinout::en) ].on_edge_down(
-			std::bind(&lcd_controller::port_updated_callback, this, pinout::en));
+			std::bind(&lcd_controller::on_enable_falling_edge, this));
 	}
 
 	void lcd_controller::register_for_updates(on_update_delegate callback) { m_on_update_cb = callback; }
 
-	void lcd_controller::port_updated_callback(pinout p)
+	void lcd_controller::port_updated_callback(pinout p) { }
+
+	void lcd_controller::on_enable_falling_edge()
 	{
-		read_write_mode_enum rw_mode = read_write_mode_enum::write;
-		registers_mode_enum	 rs_mode = registers_mode_enum::instruction;
+		read_write_mode_enum rw_mode =
+			static_cast<read_write_mode_enum>(digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rw) ]));
+		registers_mode_enum rs_mode =
+			static_cast<registers_mode_enum>(digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rs) ]));
 
-		if (p == pinout::en)
+		uint8_t value = 0;
+		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
 			{
-				if (digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rw) ]))
-					{
-						rw_mode = read_write_mode_enum::read;
-					}
-
-				if (digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rs) ]))
-					{
-						rs_mode = registers_mode_enum::data;
-					}
-
-				uint8_t value = 0;
-				for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
-					{
-						value <<= 1;
-						value |= static_cast<uint8_t>(digital_read::get(m_port.m_pins[ i ]));
-					}
-
-				switch (rs_mode)
-					{
-					case registers_mode_enum::instruction: handle_command(value); break;
-					case registers_mode_enum::data: handle_data(value); break;
-					}
+				value <<= 1;
+				value |= static_cast<uint8_t>(digital_read::get(m_port.m_pins[ i ]));
 			}
+
+		execution_data data { rw_mode, rs_mode, value };
+		execute(data);
 	}
 
-	void lcd_controller::handle_command(uint8_t command)
+	void lcd_controller::execute(execution_data const& data)
 	{
-		logger::info(std::string("Recieved command: ") + std::to_string(static_cast<int>(command)));
+		logger::info(std::string("execution: ") + std::to_string(static_cast<int>(data.rs_mode)) + " " +
+					 std::to_string(static_cast<int>(data.rw_mode)) + " " +
+					 std::to_string(static_cast<int>(data.data)));
 
-		if (digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rw) ]))
-			{
-				// TODO: Return busy flag and address counter
-				return;
-			}
-
-		if (m_on_update_cb)
-			m_on_update_cb();
-
-		for (int i = 7; i >= 0; --i)
-			{
-				if (command & (1 << i))
-					{
-						handle_command(static_cast<command_types_enum>(i));
-					}
-			}
-	}
-
-	void lcd_controller::handle_command(command_types_enum command_type)
-	{
 		if (m_busy)
 			{
-				logger::warn(std::string("The controller is in the busy mode, but a new command is incoming: ") +
-							  std::to_string(static_cast<int>(command_type)));
+				logger::warn("The controller is in the busy mode, but a new command is incoming");
 				return;
 			}
+
 		m_busy = true;
+
+		bool			   is_rs_mode	= static_cast<bool>(data.rs_mode);
+		bool			   is_rw_mode	= static_cast<bool>(data.rw_mode);
+		command_types_enum command_type = command_types_enum::clear;
+
+		if (is_rs_mode && is_rw_mode)
+			{
+				command_type = command_types_enum::read_data_from_cg_or_ddram;
+			}
+		else if (is_rs_mode && !is_rw_mode)
+			{
+				command_type = command_types_enum::write_data_to_cg_or_ddram;
+			}
+		else if (!is_rs_mode && is_rw_mode)
+			{
+				command_type = command_types_enum::read_busy_flag_and_address;
+			}
+		else
+			{
+				for (int i = 7; i >= 0; --i)
+					{
+						if (data.data & (1 << i))
+							{
+								command_type = static_cast<command_types_enum>(i);
+							}
+					}
+			}
+
 		g_scheduler.add_task([ &busy = m_busy ] { busy = false; }, s_execution_time_map[ command_type ]);
 
 		switch (command_type)
@@ -125,14 +123,13 @@ namespace lcd
 			case command_types_enum::function_set: break;
 			case command_types_enum::set_cgram_address: break;
 			case command_types_enum::set_ddram_address: break;
+			case command_types_enum::read_busy_flag_and_address: break;
+			case command_types_enum::write_data_to_cg_or_ddram: m_ddram[ 0 ] = data.data; break;
+			case command_types_enum::read_data_from_cg_or_ddram: break;
 			}
-	}
 
-	void lcd_controller::handle_data(uint8_t data)
-	{
-		m_ddram[ 0 ] = data;
-		m_on_update_cb();
-		logger::info(std::string("Recieved data: ") + std::to_string(static_cast<int>(data)));
+		if (m_on_update_cb)
+			m_on_update_cb();
 	}
 
 	char& lcd_controller::symbol_at_ddram(size_t address)
