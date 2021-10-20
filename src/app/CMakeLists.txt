@@ -9,7 +9,7 @@ add_executable (app "application.cpp")
 target_include_directories (app PUBLIC
 ${CMAKE_SOURCE_DIR}/src/lcd_logic
 ${CMAKE_SOURCE_DIR}/src/lcd_gui_qt)
-target_link_libraries (app PUBLIC lcd_gui_qt)
+target_link_libraries (app PUBLIC lcd_gui_qt logging)
 target_precompile_headers (app PUBLIC stdafx.h)
 
 # TODO: Add tests and install targets if needed.
