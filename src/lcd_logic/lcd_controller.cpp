@@ -4,6 +4,9 @@
 
 #include "scheduler.h"
 
+#include <assert.h>
+#include <logger.h>
+
 extern lcd::scheduler g_scheduler;
 
 namespace lcd
@@ -69,7 +72,7 @@ namespace lcd
 
 	void lcd_controller::handle_command(uint8_t command)
 	{
-		std::cout << "Recieved command: " << static_cast<int>(command) << std::endl;
+		logger::info(std::string("Recieved command: ") + std::to_string(static_cast<int>(command)));
 
 		if (digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rw) ]))
 			{
@@ -91,6 +94,12 @@ namespace lcd
 
 	void lcd_controller::handle_command(command_types_enum command_type)
 	{
+		if (m_busy)
+			{
+				logger::warn(std::string("The controller is in the busy mode, but a new command is incoming: ") +
+							  std::to_string(static_cast<int>(command_type)));
+				return;
+			}
 		m_busy = true;
 		g_scheduler.add_task([ &busy = m_busy ] { busy = false; }, s_execution_time_map[ command_type ]);
 
@@ -123,7 +132,7 @@ namespace lcd
 	{
 		m_ddram[ 0 ] = data;
 		m_on_update_cb();
-		std::cout << "Recieved data: " << static_cast<int>(data) << std::endl;
+		logger::info(std::string("Recieved data: ") + std::to_string(static_cast<int>(data)));
 	}
 
 	char& lcd_controller::symbol_at_ddram(size_t address)

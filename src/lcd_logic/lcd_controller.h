@@ -124,7 +124,7 @@ namespace lcd
 		cursor_direction_enum m_cursor_move_direction;
 		bool m_insert;
 		bool m_blink;
-		bool m_busy;
+		std::atomic<bool> m_busy;
 		bool m_display_on;
 		bool m_lines;
 		bool m_font;
