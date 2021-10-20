@@ -13,7 +13,6 @@ namespace lcd
 		lcd_widget(QWidget* parent = nullptr);
 
 		virtual void port_updated_callback(pinout p) override;
-		virtual void handle_command(uint8_t command) override;
-		virtual void handle_data(uint8_t data) override;
+		virtual void execute(execution_data const& data) override;
 	};
 }
