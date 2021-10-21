@@ -15,7 +15,12 @@ namespace lcd
 			std::chrono::nanoseconds(m_qelapsed_timer.nsecsElapsed()));
 	}
 
-	std::chrono::duration<double> qt_timer::delta()
+	void qt_timer::frame()
+	{
+		lcd_assert(false, "qt_timer::frame is not implemented");
+	}
+
+	std::chrono::duration<double> qt_timer::delta() const
 	{
 		lcd_assert(false, "qt_timer::delta is not implemented");
 		return std::chrono::duration<double> {};

@@ -1,26 +1,30 @@
 ﻿#include "stdafx.h"
 
+#include "app_main_window.h"
+
 #include <qapplication.h>
 #include <qt_display.h>
 #include <scheduler.h>
 #include <std_timer.h>
 
 // smaller value will decrease the speed of the simulation
-constexpr double g_timing_ratio = .001f;
-lcd::scheduler	 g_scheduler { []() -> std::unique_ptr<lcd::i_timer> {
-	std::unique_ptr<lcd::i_timer>tmr = std::make_unique<lcd::std_timer>();
-	tmr->set_prescaler(g_timing_ratio);
-	return std::move(tmr);
-} };
+constexpr double  g_timing_ratio = .001f;
+lcd::scheduler	  g_scheduler;
 std::atomic<bool> g_exit_flag = false;
 
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 
-	lcd::qt_display			panel(nullptr);
+	lcd::i_timer_ptr tmr = std::make_shared<lcd::std_timer>();
+	tmr->set_prescaler(g_timing_ratio);
+
+	g_scheduler.set_timer(tmr);
+
+	lcd::qt_display*		panel = new lcd::qt_display {};
+	lcd::app_main_window	window(60.0f, tmr, panel);
 	lcd::lcd_controller_ptr controller = std::move(std::make_shared<lcd::lcd_controller>());
-	panel.set_controller(controller);
+	panel->set_controller(controller);
 
 	// panel.set_char_at(0, 0, 'a');
 	// panel.set_char_at(1, 0, 'b');
@@ -30,7 +34,7 @@ int main(int argc, char** argv)
 	// panel.set_char_at(3, 3, 'f');
 	// panel.set_char_at(2, 7, 'g');
 	// panel.set_char_at(1, 10, 'h');
-	panel.show();
+	window.show();
 
 	std::chrono::time_point last_tick = std::chrono::system_clock::now();
 	std::thread([ = ]() {

@@ -1,12 +1,15 @@
 #pragma once
 
-#include <qwidget.h>
 #include <display.h>
 #include <i_lcd_drawer.h>
+#include <i_timer.h>
+#include <qwidget.h>
 
 namespace lcd
 {
-	class qt_display : public QWidget, public display
+	class qt_display
+		: public QWidget
+		, public display
 	{
 		Q_OBJECT
 
@@ -14,6 +17,7 @@ namespace lcd
 		qt_display(QWidget* parent = nullptr);
 
 #pragma region QWidget
+		virtual QSize sizeHint() const override;
 
 	protected:
 		void paintEvent(QPaintEvent* e) override;
@@ -29,4 +33,4 @@ namespace lcd
 	private:
 		std::vector<i_lcd_drawer_ptr> m_drawers;
 	};
-}
+} // namespace lcd

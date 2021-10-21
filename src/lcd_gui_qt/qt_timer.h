@@ -12,7 +12,9 @@ namespace lcd
 
 		virtual std::chrono::duration<double> elapsed() const override;
 
-		virtual std::chrono::duration<double> delta() override;
+		virtual void frame() override;
+
+		virtual std::chrono::duration<double> delta() const override;
 
 		virtual void set_prescaler(double prescaler) override;
 
