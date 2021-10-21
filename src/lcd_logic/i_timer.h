@@ -2,6 +2,11 @@
 
 namespace lcd
 {
+	class i_timer;
+	using i_timer_ptr  = std::shared_ptr<i_timer>;
+	using i_timer_wptr = std::weak_ptr<i_timer>;
+	using i_timer_uptr = std::unique_ptr<i_timer>;
+
 	class i_timer
 	{
 	public:
@@ -16,13 +21,16 @@ namespace lcd
 		/// @brief Duration between iterations.
 		///
 		/// @details Every time the function is called it will tell how much time
-		/// has passed sice the last time it was called multiplied by the
-		/// prescaler currently set on the timer. For example, if the actual time
-		/// passed since the last call is 100ms and the prescaler is set to be
-		/// 10.0f then the return value will be equal to 1000ms.
+		/// has passed sice the last frame call.
 		///
 		/// @return the duration since the last delta was called.
-		virtual std::chrono::duration<double> delta() = 0;
+		virtual std::chrono::duration<double> delta() const = 0;
+
+		/// @brief Tells the timer that a frame has passed.
+		///
+		/// @details This function is mostly used to update the delta time between
+		/// the frames.
+		virtual void frame() = 0;
 
 		/// @brief Sets the timer prescaler.
 		///
