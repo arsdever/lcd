@@ -9,13 +9,13 @@
 
 namespace lcd
 {
-	constexpr int	   ce_pixel_size { 3 };
-	constexpr int	   ce_pixel_spacing { 1 };
-	constexpr int	   ce_char_width { 5 };
-	constexpr int	   ce_char_height { 8 };
-	constexpr int	   ce_char_hspacing { 4 };
-	constexpr int	   ce_char_vspacing { 4 };
-	constexpr QMargins ce_margins { 10, 10, 10, 10 };
+	constexpr float	   ce_pixel_size { 3 };
+	constexpr float	   ce_pixel_spacing { .4f };
+	constexpr float	   ce_char_width { 5 };
+	constexpr float	   ce_char_height { 8 };
+	constexpr float	   ce_char_hspacing { 6 };
+	constexpr float	   ce_char_vspacing { 6 };
+	constexpr QMargins ce_padding { 0, 0, 0, 0 };
 
 	qt_display::qt_display(QWidget* parent) : QWidget(parent), display(16, 4)
 	{
@@ -25,25 +25,27 @@ namespace lcd
 
 #pragma region QWidget
 
-	QSize qt_display::sizeHint() const
+	QSize qt_display::minimumSizeHint() const
 	{
-		QSize char_size = { ce_char_width * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing,
-							ce_char_height * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing };
-		return QSize { static_cast<int>(m_width * (char_size.width() + ce_char_hspacing) - ce_char_hspacing),
-					   static_cast<int>(m_height * (char_size.height() + ce_char_vspacing) - ce_char_vspacing )} +
-			   QSize { ce_margins.left() + ce_margins.right(), ce_margins.top() + ce_margins.bottom() };
+		QSizeF char_size = { ce_char_width * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing,
+							 ce_char_height * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing };
+		QSizeF result	 = QSizeF { m_width * (char_size.width() + ce_char_hspacing) - ce_char_hspacing,
+									m_height * (char_size.height() + ce_char_vspacing) - ce_char_vspacing } +
+						QSizeF { ce_padding.left() + ce_padding.right(), ce_padding.top() + ce_padding.bottom() };
+		return QSize(result.width(), result.height());
 	}
 
 	void qt_display::paintEvent(QPaintEvent* e)
 	{
 		QPainter painter(this);
-		painter.translate(ce_margins.left(), ce_margins.top());
+		painter.setRenderHint(QPainter::RenderHint::HighQualityAntialiasing, true);
 		for (i_lcd_drawer_ptr drawer : m_drawers)
 			{
 				painter.save();
 
 				lcd_draw_properties props = {};
 				std::memset(&props, 0, sizeof(lcd_draw_properties));
+
 				props.painter		= &painter;
 				props.lcd_width		= e->rect().width();
 				props.lcd_height	= e->rect().height();

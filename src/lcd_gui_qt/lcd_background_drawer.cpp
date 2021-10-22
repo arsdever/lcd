@@ -9,6 +9,6 @@ namespace lcd
 	{
 		QPainter& painter = *props.painter;
 
-		painter.fillRect(0, 0, props.lcd_width, props.lcd_height, QColor("#397d54"));
+		painter.fillRect(0, 0, props.lcd_width, props.lcd_height, QColor("#87ad34"));
 	}
 }

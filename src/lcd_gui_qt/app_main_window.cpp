@@ -5,6 +5,7 @@
 #include "qt_display.h"
 
 #include <logger.h>
+#include <qhboxlayout>
 #include <qstatusbar>
 #include <qtimer>
 
@@ -16,8 +17,7 @@ namespace lcd
 									 QWidget*	  parent)
 		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps), m_display(display)
 	{
-		display->setParent(this);
-		display->move(0, 0);
+		setCentralWidget(display);
 
 		m_fps_timer = new QTimer();
 
@@ -66,7 +66,7 @@ namespace lcd
 						suffix = "ms";
 					}
 
-				sb->showMessage(tr("delta time: %1 %2").arg(elapsed).arg(suffix.c_str()));
+				sb->showMessage(tr("delta time: %1 %2 size: (%3, %4)").arg(elapsed).arg(suffix.c_str()).arg(width()).arg(height()));
 			}
 	}
 } // namespace lcd
