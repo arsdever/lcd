@@ -17,7 +17,7 @@ namespace lcd
 		qt_display(QWidget* parent = nullptr);
 
 #pragma region QWidget
-		virtual QSize sizeHint() const override;
+		virtual QSize minimumSizeHint() const override;
 
 	protected:
 		void paintEvent(QPaintEvent* e) override;
