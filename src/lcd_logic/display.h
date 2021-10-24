@@ -13,8 +13,6 @@ namespace lcd
 		display(size_t width, size_t height);
 		virtual ~display() = default;
 
-		virtual void setup_font(std::array<std::array<char, 8>, 255> font);
-		virtual std::array<std::array<char, 8>, 255> const& font() const;
 		virtual void update();
 
 	public:
@@ -28,12 +26,12 @@ namespace lcd
 
 	public:
 		virtual void set_char_at(size_t row, size_t column, char ch) override;
-		virtual char get_char_at(size_t row, size_t column) const;
+		virtual char get_char_at(size_t row, size_t column) const override;
+		virtual std::array<char, 8> get_symbol_at(size_t row, size_t column) const override;
 
 #pragma endregion i_character_data
 
 	protected:
-		std::array<std::array<char, 8>, 255> m_font;
 		size_t m_width;
 		size_t m_height;
 		std::vector<char> m_visual;

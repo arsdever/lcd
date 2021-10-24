@@ -19,7 +19,7 @@ namespace lcd
 					{
 						painter.save();
 
-						std::array<char, 8> character = (*props.font)[ props.char_data->get_char_at(chy, chx) ];
+						std::array<char, 8> character = props.symbol_getter(chy, chx);
 						for (char chrow : character)
 							{
 								painter.save();
