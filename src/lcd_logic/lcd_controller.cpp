@@ -110,10 +110,10 @@ namespace lcd
 
 	lcd_controller::lcd_controller()
 		: m_interface_type { interface_type_enum::undefined }, m_vscroll { 0 }, m_hscroll { 0 },
-		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::decrement }, m_insert { false },
+		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment }, m_insert { false },
 		  m_blink { false }, m_busy { false }, m_display_on { false }, m_lines { false }, m_font { false },
-		  m_scroll_direction { false }, m_cgram_address_counter { 0 }, m_cgram { 0 },
-		  m_ddram_address_counter { 0 }, m_ddram { 0 }
+		  m_scroll_direction { false }, m_address_mode { address_mode::ddram },
+		  m_cgram_address_counter { 0 }, m_cgram { 0 }, m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
 		m_port.m_pins[ static_cast<int>(pinout::en) ].on_edge_down(
@@ -183,7 +183,6 @@ namespace lcd
 			case command_types_enum::clear:
 				{
 					instruction_impl = [ & ] {
-						m_busy = false;
 						std::memset(m_ddram.data(), ' ', m_ddram.size());
 						m_ddram_address_counter = 0x00;
 					};
@@ -219,7 +218,52 @@ namespace lcd
 			case command_types_enum::read_busy_flag_and_address: break;
 			case command_types_enum::write_data_to_cg_or_ddram:
 				{
-					instruction_impl = [ &, data ] { m_ddram[ 0 ] = data.data; };
+					instruction_impl = [ &, data ] {
+						switch (m_address_mode)
+							{
+							case address_mode::cgram:
+								{
+									m_cgram[ m_cgram_address_counter ] = data.data;
+									m_cgram_address_counter +=
+										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
+
+									if (m_cgram_address_counter >= m_cgram.size())
+										m_cgram_address_counter = 0;
+									else if (m_cgram_address_counter < 0)
+										m_cgram_address_counter = m_cgram.size() - 1;
+
+									break;
+								}
+							case address_mode::ddram:
+								{
+									m_ddram[ m_ddram_address_counter ] = data.data;
+									if (m_cursor_move_direction == cursor_direction_enum::increment)
+										{
+											++m_ddram_address_counter;
+
+											if (++m_hscroll >= 40)
+												{
+													m_hscroll -= 40;
+												}
+										}
+									else
+										{
+											--m_ddram_address_counter;
+											if (--m_hscroll < 0)
+												{
+													m_hscroll += 40;
+												}
+										}
+
+									if (m_ddram_address_counter >= m_ddram.size())
+										m_ddram_address_counter = 0;
+									else if (m_ddram_address_counter < 0)
+										m_ddram_address_counter = m_ddram.size() - 1;
+
+									break;
+								}
+							}
+					};
 					break;
 				}
 			case command_types_enum::read_data_from_cg_or_ddram:
@@ -230,8 +274,15 @@ namespace lcd
 							case address_mode::cgram:
 								{
 									value_to_bus(m_cgram[ m_cgram_address_counter ]);
+
 									m_cgram_address_counter +=
 										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
+
+									if (m_cgram_address_counter >= m_cgram.size())
+										m_cgram_address_counter = 0;
+									else if (m_cgram_address_counter < 0)
+										m_cgram_address_counter = m_cgram.size() - 1;
+
 									break;
 								}
 							case address_mode::ddram:
@@ -239,6 +290,12 @@ namespace lcd
 									value_to_bus(m_ddram[ m_ddram_address_counter ]);
 									m_ddram_address_counter +=
 										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
+
+									if (m_ddram_address_counter >= m_ddram.size())
+										m_ddram_address_counter = 0;
+									else if (m_ddram_address_counter < 0)
+										m_ddram_address_counter = m_ddram.size() - 1;
+
 									break;
 								}
 							}
@@ -253,8 +310,9 @@ namespace lcd
 				return;
 			}
 
-		scheduler::task_t executor = [ &updater = m_on_update_cb, instruction_impl ] {
+		scheduler::task_t executor = [ &busy = m_busy, &updater = m_on_update_cb, instruction_impl ] {
 			instruction_impl();
+			busy = false;
 
 			if (updater != nullptr)
 				updater();

@@ -8,7 +8,8 @@
 #include <std_timer.h>
 
 // smaller value will decrease the speed of the simulation
-constexpr double  g_timing_ratio = .00001f;
+// 1s = 100us
+constexpr double  g_timing_ratio = .01f;
 lcd::scheduler	  g_scheduler;
 std::atomic<bool> g_exit_flag = false;
 
@@ -36,20 +37,36 @@ int main(int argc, char** argv)
 	// panel.set_char_at(1, 10, 'h');
 	window.show();
 
+	auto instruction = [](lcd::lcd_controller& controller, bool rs, bool rw, uint8_t byte) {
+		controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::rw) ].set_voltage(rw ? 5.0f : 0.0f);
+		controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::rs) ].set_voltage(rs ? 5.0f : 0.0f);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data0) ],
+									  byte & 1);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data1) ],
+									  byte & 2);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data2) ],
+									  byte & 4);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data3) ],
+									  byte & 8);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data4) ],
+									  byte & 16);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data5) ],
+									  byte & 32);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data6) ],
+									  byte & 64);
+		lcd::digital_operation::write(controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data7) ],
+									  byte & 128);
+		controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(5.0f);
+		controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(0.0f);
+	};
+
 	std::chrono::time_point last_tick = std::chrono::system_clock::now();
 	std::thread([ = ]() {
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::rw) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::rs) ].set_voltage(5.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data0) ].set_voltage(5.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data1) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data2) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data3) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data4) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data5) ].set_voltage(5.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data6) ].set_voltage(5.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::data7) ].set_voltage(0.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(5.0f);
-		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(0.0f);
+		for (int i = 0; i < 90; ++i)
+			{
+				instruction(*controller, 1, 0, i + 32);
+				std::this_thread::sleep_for(std::chrono::milliseconds(4));
+			}
 	}).detach();
 	std::thread scheduler_loop([ &last_tick ] {
 		g_scheduler.start();
