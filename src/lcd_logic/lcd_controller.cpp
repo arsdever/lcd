@@ -4,7 +4,7 @@
 
 #include "scheduler.h"
 
-#include <assert.h>
+#include <lcd_assert.h>
 #include <logger.h>
 
 extern lcd::scheduler g_scheduler;
@@ -13,8 +13,8 @@ namespace lcd
 {
 	std::unordered_map<lcd_controller::command_types_enum, std::chrono::nanoseconds>
 		lcd_controller::s_execution_time_map = {
-			{ lcd_controller::command_types_enum::clear, std::chrono::microseconds { 37 } },
-			{ lcd_controller::command_types_enum::return_home, std::chrono::microseconds { 37 } },
+			{ lcd_controller::command_types_enum::clear, std::chrono::microseconds { 1520 } },
+			{ lcd_controller::command_types_enum::return_home, std::chrono::microseconds { 1520 } },
 			{ lcd_controller::command_types_enum::entry_mode_set, std::chrono::microseconds { 37 } },
 			{ lcd_controller::command_types_enum::display_on_off_control, std::chrono::microseconds { 37 } },
 			{ lcd_controller::command_types_enum::cursor_or_display_shift, std::chrono::microseconds { 37 } },
@@ -99,23 +99,35 @@ namespace lcd
 					}
 			}
 
-		g_scheduler.add_task([ &busy = m_busy ] { busy = false; }, s_execution_time_map[ command_type ]);
+		scheduler::task_t instruction_impl;
 
 		switch (command_type)
 			{
 			case command_types_enum::clear:
-				std::memset(m_ddram.data(), ' ', m_ddram.size());
-				m_ddram_address_counter = 0x00;
+				{
+					instruction_impl = [ & ] {
+						m_busy = false;
+						std::memset(m_ddram.data(), ' ', m_ddram.size());
+						m_ddram_address_counter = 0x00;
+					};
+					break;
+				}
 				break;
 			case command_types_enum::return_home:
-				m_ddram_address_counter = 0x00;
-				m_vscroll				= 0;
-				m_hscroll				= 0;
-				break;
+				{
+					instruction_impl = [ & ] {
+						m_ddram_address_counter = 0x00;
+						m_vscroll				= 0;
+						m_hscroll				= 0;
+					};
+					break;
+				}
 			case command_types_enum::entry_mode_set:
 				{
-					bool dir				= digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
-					m_cursor_move_direction = static_cast<cursor_direction_enum>(dir);
+					instruction_impl = [ & ] {
+						bool dir = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
+						m_cursor_move_direction = static_cast<cursor_direction_enum>(dir);
+					};
 					break;
 				}
 			case command_types_enum::display_on_off_control: break;
@@ -124,12 +136,27 @@ namespace lcd
 			case command_types_enum::set_cgram_address: break;
 			case command_types_enum::set_ddram_address: break;
 			case command_types_enum::read_busy_flag_and_address: break;
-			case command_types_enum::write_data_to_cg_or_ddram: m_ddram[ 0 ] = data.data; break;
+			case command_types_enum::write_data_to_cg_or_ddram:
+				{
+					instruction_impl = [ &, data ] { m_ddram[ 0 ] = data.data; };
+					break;
+				}
 			case command_types_enum::read_data_from_cg_or_ddram: break;
 			}
 
-		if (m_on_update_cb)
-			m_on_update_cb();
+		if (!instruction_impl)
+			{
+				lcd_assert(false, "The instruction leads to an empty functionality");
+				return;
+			}
+
+		scheduler::task_t executor = [ &updater = m_on_update_cb, instruction_impl ] {
+			instruction_impl();
+
+			if (updater != nullptr)
+				updater();
+		};
+		g_scheduler.add_task(executor, s_execution_time_map[ command_type ]);
 	}
 
 	char& lcd_controller::symbol_at_ddram(size_t address)
