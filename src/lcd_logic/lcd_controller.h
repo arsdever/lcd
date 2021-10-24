@@ -30,6 +30,12 @@ namespace lcd
 			read
 		};
 
+		enum class address_mode
+		{
+			cgram,
+			ddram
+		};
+
 		enum class cursor_direction_enum : bool
 		{
 			decrement = 0,
@@ -122,23 +128,29 @@ namespace lcd
 
 	private:
 		void on_enable_falling_edge();
+		void value_to_bus(uint8_t value);
+		uint8_t value_from_bus();
 
 	public:
-		port<16>			  m_port;
-		interface_type_enum	  m_interface_type;
-		on_update_delegate	  m_on_update_cb;
-		size_t				  m_hscroll;
-		size_t				  m_vscroll;
-		bool				  m_cursor_show;
-		cursor_direction_enum m_cursor_move_direction;
-		bool				  m_insert;
-		bool				  m_blink;
-		std::atomic<bool>	  m_busy;
-		bool				  m_display_on;
-		bool				  m_lines;
-		bool				  m_font;
-		bool				  m_scroll_direction;
-		size_t				  m_ddram_address_counter;
-		std::array<char, 80>  m_ddram;
+		port<16>			   m_port;
+		interface_type_enum	   m_interface_type;
+		on_update_delegate	   m_on_update_cb;
+		size_t				   m_hscroll;
+		size_t				   m_vscroll;
+		bool				   m_cursor_show;
+		cursor_direction_enum  m_cursor_move_direction;
+		bool				   m_insert;
+		bool				   m_blink;
+		std::atomic<bool>	   m_busy;
+		bool				   m_display_on;
+		bool				   m_lines;
+		bool				   m_font;
+		bool				   m_scroll_direction;
+		address_mode		   m_address_mode;
+		std::array<char, 9920> m_cgrom;
+		size_t				   m_cgram_address_counter;
+		std::array<char, 64>   m_cgram;
+		size_t				   m_ddram_address_counter;
+		std::array<char, 80>   m_ddram;
 	};
 } // namespace lcd
