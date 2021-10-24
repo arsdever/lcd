@@ -35,11 +35,6 @@ namespace lcd
 						std::get<1>(*tmp) -= delta;
 						if (std::get<1>(*tmp) < std::chrono::nanoseconds { 0 })
 							{
-								std::cout << std::get<2>(*tmp) << " : task finished in "
-										  << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(
-												 std::chrono::system_clock::now() - std::get<3>(*tmp))
-												 .count()
-										  << " milliseconds" << std::endl;
 								std::get<0> (*tmp)();
 								m_tasks.erase(tmp);
 							}
