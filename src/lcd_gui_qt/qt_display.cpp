@@ -46,12 +46,13 @@ namespace lcd
 				lcd_draw_properties props = {};
 				std::memset(&props, 0, sizeof(lcd_draw_properties));
 
-				props.painter		= &painter;
-				props.lcd_width		= e->rect().width();
-				props.lcd_height	= e->rect().height();
-				props.columns		= m_width;
-				props.rows			= m_height;
-				props.font			= &m_font;
+				props.painter	 = &painter;
+				props.lcd_width	 = e->rect().width();
+				props.lcd_height = e->rect().height();
+				props.columns	 = m_width;
+				props.rows		 = m_height;
+				props.symbol_getter =
+					std::bind(&qt_display::get_symbol_at, this, std::placeholders::_1, std::placeholders::_2);
 				props.char_data		= this;
 				props.pixel_size	= ce_pixel_size;
 				props.pixel_spacing = ce_pixel_spacing;
