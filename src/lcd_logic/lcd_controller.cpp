@@ -130,7 +130,11 @@ namespace lcd
 					};
 					break;
 				}
-			case command_types_enum::display_on_off_control: break;
+			case command_types_enum::display_on_off_control:
+				{
+					instruction_impl = [ & ] { m_display_on = false; };
+					break;
+				}
 			case command_types_enum::cursor_or_display_shift: break;
 			case command_types_enum::function_set: break;
 			case command_types_enum::set_cgram_address: break;
