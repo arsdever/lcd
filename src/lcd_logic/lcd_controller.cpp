@@ -131,14 +131,7 @@ namespace lcd
 		registers_mode_enum rs_mode =
 			static_cast<registers_mode_enum>(digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::rs) ]));
 
-		uint8_t value = 0;
-		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
-			{
-				value <<= 1;
-				value |= static_cast<uint8_t>(digital_operation::read(m_port.m_pins[ i ]));
-			}
-
-		execution_data data { rw_mode, rs_mode, value };
+		execution_data data { rw_mode, rs_mode, value_from_bus() };
 		execute(data);
 	}
 
@@ -229,7 +222,29 @@ namespace lcd
 					instruction_impl = [ &, data ] { m_ddram[ 0 ] = data.data; };
 					break;
 				}
-			case command_types_enum::read_data_from_cg_or_ddram: break;
+			case command_types_enum::read_data_from_cg_or_ddram:
+				{
+					instruction_impl = [ & ] {
+						switch (m_address_mode)
+							{
+							case address_mode::cgram:
+								{
+									value_to_bus(m_cgram[ m_cgram_address_counter ]);
+									m_cgram_address_counter +=
+										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
+									break;
+								}
+							case address_mode::ddram:
+								{
+									value_to_bus(m_ddram[ m_ddram_address_counter ]);
+									m_ddram_address_counter +=
+										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
+									break;
+								}
+							}
+					};
+					break;
+				}
 			}
 
 		if (!instruction_impl)
@@ -266,4 +281,24 @@ namespace lcd
 	}
 
 	bool lcd_controller::is_busy() const { return m_busy; }
+
+	void lcd_controller::value_to_bus(uint8_t value)
+	{
+		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
+			{
+				value <<= 1;
+				digital_operation::write(m_port.m_pins[ i ], value & 1);
+			}
+	}
+
+	uint8_t lcd_controller::value_from_bus()
+	{
+		uint8_t value = 0;
+		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
+			{
+				value <<= 1;
+				value |= static_cast<uint8_t>(digital_operation::read(m_port.m_pins[ i ]));
+			}
+		return value;
+	}
 } // namespace lcd
