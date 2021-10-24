@@ -1,19 +1,22 @@
 #pragma once
 
+#include <logger.h>
+
 #ifndef NDEBUG
 #	define lcd_assert(condition, message)                                                                             \
 		do                                                                                                             \
 			{                                                                                                          \
 				if (!(condition))                                                                                      \
 					{                                                                                                  \
-						std::cerr << "Assertion `" #condition "` failed in " << __FILE__ << " line " << __LINE__       \
-								  << ": " << message << std::endl;                                                     \
+						logger::critical(std::string("Assertion `" #condition "` failed in ") +                        \
+										 std::string(__FILE__) + std::string(" line ") + std::to_string(__LINE__) +    \
+										 std::string(": ") + std::string(message) + std::string("\n"));                \
 						std::terminate();                                                                              \
 					}                                                                                                  \
 			}                                                                                                          \
 		while (false)
 #else
-#	define lcd_assert(condition, message)                                                                             \
+#	define lcd_assert(contition, message)                                                                             \
 		do                                                                                                             \
 			{                                                                                                          \
 			}                                                                                                          \
