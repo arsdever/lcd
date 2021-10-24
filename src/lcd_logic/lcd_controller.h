@@ -114,6 +114,7 @@ namespace lcd
 		void		register_for_updates(on_update_delegate callback);
 		char&		symbol_at_ddram(size_t address);
 		const char& symbol_at_ddram(size_t address) const;
+		bool		is_busy() const;
 
 	protected:
 		virtual void port_updated_callback(pinout p);

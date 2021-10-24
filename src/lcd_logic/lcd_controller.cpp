@@ -43,15 +43,15 @@ namespace lcd
 	void lcd_controller::on_enable_falling_edge()
 	{
 		read_write_mode_enum rw_mode =
-			static_cast<read_write_mode_enum>(digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rw) ]));
+			static_cast<read_write_mode_enum>(digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::rw) ]));
 		registers_mode_enum rs_mode =
-			static_cast<registers_mode_enum>(digital_read::get(m_port.m_pins[ static_cast<int>(pinout::rs) ]));
+			static_cast<registers_mode_enum>(digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::rs) ]));
 
 		uint8_t value = 0;
 		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
 			{
 				value <<= 1;
-				value |= static_cast<uint8_t>(digital_read::get(m_port.m_pins[ i ]));
+				value |= static_cast<uint8_t>(digital_operation::read(m_port.m_pins[ i ]));
 			}
 
 		execution_data data { rw_mode, rs_mode, value };
@@ -114,7 +114,7 @@ namespace lcd
 				break;
 			case command_types_enum::entry_mode_set:
 				{
-					bool dir				= digital_read::get(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
+					bool dir				= digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
 					m_cursor_move_direction = static_cast<cursor_direction_enum>(dir);
 					break;
 				}
@@ -149,4 +149,6 @@ namespace lcd
 
 		return m_ddram[ address ];
 	}
+
+	bool lcd_controller::is_busy() const { return m_busy; }
 } // namespace lcd
