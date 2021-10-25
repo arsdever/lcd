@@ -44,6 +44,19 @@ namespace lcd
 				}
 		}
 
+		inline uint8_t read_bus() const
+		{
+			uint8_t value = 0;
+			for (int i = static_cast<int>(lcd_controller::pinout::data7);
+				 i >= static_cast<int>(lcd_controller::pinout::data0);
+				 --i)
+				{
+					value <<= 1;
+					value |= static_cast<uint8_t>(digital_operation::read(m_controller.m_port.m_pins[ i ]));
+				}
+			return value;
+		}
+
 		inline void command(bool rs, bool rw, uint8_t byte)
 		{
 			m_controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::rw) ].set_voltage(rw ? 5.0f
@@ -138,15 +151,11 @@ namespace lcd
 		framework.command(true, false, 'a');
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), true);
 		framework.command(false, true, 0);
-		BOOST_CHECK_EQUAL(digital_operation::read(
-							  framework.controller().m_port.m_pins[ static_cast<int>(lcd_controller::pinout::data7) ]),
-						  true);
+		BOOST_CHECK_EQUAL(framework.read_bus(), 0x80);
 		std::this_thread::sleep_for(std::chrono::milliseconds(40));
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), false);
 		framework.command(false, true, 0);
-		BOOST_CHECK_EQUAL(digital_operation::read(
-							  framework.controller().m_port.m_pins[ static_cast<int>(lcd_controller::pinout::data7) ]),
-						  false);
+		BOOST_CHECK_EQUAL(framework.read_bus(), 0x01);
 		framework.stop();
 	}
 

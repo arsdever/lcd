@@ -358,10 +358,10 @@ namespace lcd
 
 	void lcd_controller::value_to_bus(uint8_t value)
 	{
-		for (int i = static_cast<int>(pinout::data7); i >= static_cast<int>(pinout::data0); --i)
+		for (int i = static_cast<int>(pinout::data0); i <= static_cast<int>(pinout::data7); ++i)
 			{
-				value <<= 1;
 				digital_operation::write(m_port.m_pins[ i ], value & 1);
+				value >>= 1;
 			}
 	}
 
