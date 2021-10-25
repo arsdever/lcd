@@ -109,10 +109,10 @@ namespace lcd
 		};
 
 	lcd_controller::lcd_controller()
-		: m_interface_type { interface_type_enum::undefined }, m_vscroll { 0 }, m_hscroll { 0 },
-		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment }, m_insert { false },
-		  m_blink { false }, m_busy { false }, m_display_on { false }, m_lines { false }, m_font { false },
-		  m_scroll_direction { false }, m_address_mode { address_mode::ddram },
+		: m_interface_type { interface_type_enum::undefined }, m_on_update_cb { nullptr }, m_vscroll { 0 },
+		  m_hscroll { 0 }, m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment },
+		  m_insert { false }, m_blink { false }, m_busy { false }, m_display_on { false }, m_lines { false },
+		  m_font { false }, m_scroll_direction { false }, m_address_mode { address_mode::ddram },
 		  m_cgram_address_counter { 0 }, m_cgram { 0 }, m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
@@ -141,6 +141,25 @@ namespace lcd
 					 std::to_string(static_cast<int>(data.rw_mode)) + " " +
 					 std::to_string(static_cast<int>(data.data)));
 
+		bool			   is_rs_mode	= static_cast<bool>(data.rs_mode);
+		bool			   is_rw_mode	= static_cast<bool>(data.rw_mode);
+		command_types_enum command_type = command_types_enum::clear;
+
+		// Handling read_busy_flag_and_address
+		// This should be done separately because the instruction doesn't care
+		// about the busy state of te controller and doesn't contribute into it.
+		if (!is_rs_mode && is_rw_mode)
+			{
+				switch (m_address_mode)
+					{
+					case address_mode::cgram: value_to_bus(m_cgram_address_counter); break;
+					case address_mode::ddram: value_to_bus(m_ddram_address_counter); break;
+					}
+
+				digital_operation::write(m_port.m_pins[ static_cast<int>(pinout::data7) ], is_busy());
+				return;
+			}
+
 		if (m_busy)
 			{
 				logger::warn("The controller is in the busy mode, but a new command is incoming");
@@ -148,10 +167,6 @@ namespace lcd
 			}
 
 		m_busy = true;
-
-		bool			   is_rs_mode	= static_cast<bool>(data.rs_mode);
-		bool			   is_rw_mode	= static_cast<bool>(data.rw_mode);
-		command_types_enum command_type = command_types_enum::clear;
 
 		if (is_rs_mode && is_rw_mode)
 			{
@@ -163,6 +178,7 @@ namespace lcd
 			}
 		else if (!is_rs_mode && is_rw_mode)
 			{
+				lcd_assert(false, "read_busy_flag_and_address is handled separately: this code should not be executed");
 				command_type = command_types_enum::read_busy_flag_and_address;
 			}
 		else
