@@ -63,14 +63,24 @@ int main(int argc, char** argv)
 	std::chrono::time_point last_tick = std::chrono::system_clock::now();
 	std::thread([ = ]() {
 		instruction(*controller, 0, 0, 1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(160));
 		instruction(*controller, 0, 0, 0b00001111);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 		instruction(*controller, 0, 0, 0b00111000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 
-		for (int i = 0; i < 90; ++i)
+		std::string text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget "
+						   "dolor. Aenean massa. Cum sociis natoque pen";
+
+		for (char c : text)
 			{
-				instruction(*controller, 1, 0, i + 32);
+				instruction(*controller, 1, 0, c);
 				std::this_thread::sleep_for(std::chrono::milliseconds(4));
 			}
+
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		instruction(*controller, 0, 0, 0b00110000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 	}).detach();
 	std::thread scheduler_loop([ &last_tick ] {
 		g_scheduler.start();

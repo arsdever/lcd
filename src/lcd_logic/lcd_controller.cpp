@@ -365,19 +365,11 @@ namespace lcd
 
 	char& lcd_controller::symbol_at_ddram(size_t address)
 	{
-		assert(address >= 0x00 && address < 0x28 || address >= 0x40 && address < 0x68);
-		if (address > 0x27)
-			address -= 40;
-
 		return m_ddram[ address ];
 	}
 
 	const char& lcd_controller::symbol_at_ddram(size_t address) const
 	{
-		assert(address >= 0x00 && address < 0x28 || address >= 0x40 && address < 0x68);
-		if (address > 0x27)
-			address -= 40;
-
 		return m_ddram[ address ];
 	}
 
