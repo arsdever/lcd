@@ -249,7 +249,14 @@ namespace lcd
 					};
 					break;
 				}
-			case command_types_enum::set_cgram_address: break;
+			case command_types_enum::set_cgram_address:
+				{
+					instruction_impl = [ & ] {
+						m_address_mode			= address_mode::cgram;
+						m_cgram_address_counter = value_from_bus() & 0x3f;
+					};
+					break;
+				}
 			case command_types_enum::set_ddram_address:
 				{
 					instruction_impl = [ & ] {
@@ -363,15 +370,9 @@ namespace lcd
 		g_scheduler.add_task(executor, s_execution_time_map[ command_type ]);
 	}
 
-	char& lcd_controller::symbol_at_ddram(size_t address)
-	{
-		return m_ddram[ address ];
-	}
+	char& lcd_controller::symbol_at_ddram(size_t address) { return m_ddram[ address ]; }
 
-	const char& lcd_controller::symbol_at_ddram(size_t address) const
-	{
-		return m_ddram[ address ];
-	}
+	const char& lcd_controller::symbol_at_ddram(size_t address) const { return m_ddram[ address ]; }
 
 	bool lcd_controller::is_busy() const { return m_busy; }
 
