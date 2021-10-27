@@ -23,15 +23,18 @@ namespace lcd
 		if (row < 0 || row > m_height || column < 0 || column > m_width)
 			{
 				lcd_assert(false,
-						   std::string("The requested symbol is out of the lcd space: ") + std::to_string(column) + " " +
-							   std::to_string(row));
+						   std::string("The requested symbol is out of the lcd space: ") + std::to_string(column) +
+							   " " + std::to_string(row));
 
 				return m_controller->symbol_at_ddram(0x00);
 			}
 
 		if (m_controller->lines() == lcd_controller::display_lines_mode_enum::single_line)
 			{
-				return m_controller->symbol_at_ddram(row % 2 * 0x27 + column % 0x28);
+				if (row % 2)
+					return ' ';
+
+				return m_controller->symbol_at_ddram(row / 2 * m_width + column);
 			}
 		else
 			{
