@@ -78,8 +78,32 @@ int main(int argc, char** argv)
 				std::this_thread::sleep_for(std::chrono::milliseconds(4));
 			}
 
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // show for a second
 		instruction(*controller, 0, 0, 0b00110000);
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // set 1 line mode and show a second
+		instruction(*controller, 0, 0, 0b00111000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4)); // switch back to 2 line mode
+		instruction(*controller, 1, 0, 0b00000001);
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // show the 0x01 character element
+		instruction(*controller, 0, 0, 0b00111000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 0, 0, 0b01001000); // set cgram 0x08 (0x01 character)
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00001110); // draw the character
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00011011);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00010001);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00010001);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00011111);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00011111);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00011111);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		instruction(*controller, 1, 0, 0b00011111);
 		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 	}).detach();
 	std::thread scheduler_loop([ &last_tick ] {
