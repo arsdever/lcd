@@ -166,6 +166,6 @@ namespace lcd
 		size_t					m_cgram_address_counter;
 		std::array<char, 64>	m_cgram;
 		size_t					m_ddram_address_counter;
-		std::array<char, 80>	m_ddram;
+		std::array<char, 128>	m_ddram;
 	};
 } // namespace lcd

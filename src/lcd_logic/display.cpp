@@ -2,6 +2,8 @@
 
 #include "lcd_controller.h"
 
+#include <lcd_assert.h>
+
 namespace lcd
 {
 	display::display(size_t width, size_t height) : m_width(width), m_height(height), m_visual(width * height + 1) { }
@@ -19,9 +21,25 @@ namespace lcd
 	const char& display::symbol_at(size_t row, size_t column) const
 	{
 		if (row < 0 || row > m_height || column < 0 || column > m_width)
-			return m_controller->symbol_at_ddram(0x00);
+			{
+				lcd_assert(false,
+						   std::string("The requested symbol is out of the lcd space: ") + std::to_string(column) +
+							   " " + std::to_string(row));
 
-		return m_controller->symbol_at_ddram(row % 2 * 0x40 + row / 2 * m_width + column);
+				return m_controller->symbol_at_ddram(0x00);
+			}
+
+		if (m_controller->lines() == lcd_controller::display_lines_mode_enum::single_line)
+			{
+				if (row % 2)
+					return ' ';
+
+				return m_controller->symbol_at_ddram(row / 2 * m_width + column);
+			}
+		else
+			{
+				return m_controller->symbol_at_ddram(row % 2 * 0x40 + row / 2 * m_width + column);
+			}
 	}
 
 	void display::set_controller(lcd_controller_ptr controller)
