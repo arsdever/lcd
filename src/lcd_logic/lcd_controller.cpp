@@ -111,10 +111,9 @@ namespace lcd
 	lcd_controller::lcd_controller()
 		: m_interface_type { interface_type_enum::eight_pin_interface },
 		  m_display_lines_mode { display_lines_mode_enum::single_line },
-		  m_font(fonts_enum::five_eight), m_on_update_cb { nullptr }, m_vscroll { 0 }, m_hscroll { 0 },
-		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment }, m_insert { false },
-		  m_blink { false }, m_busy { false }, m_display_on { false }, m_scroll_direction { false },
-		  m_address_mode_enum { address_mode_enum::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
+		  m_font(fonts_enum::five_eight), m_on_update_cb { nullptr }, m_scroll { 0 }, m_cursor_show { false },
+		  m_move_direction { move_direction_enum::increment }, m_insert { false }, m_blink { false }, m_busy { false },
+		  m_display_on { false }, m_address_mode_enum { address_mode_enum::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
 		  m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
@@ -212,16 +211,15 @@ namespace lcd
 				{
 					instruction_impl = [ & ] {
 						m_ddram_address_counter = 0x00;
-						m_vscroll				= 0;
-						m_hscroll				= 0;
+						m_scroll				= 0;
 					};
 					break;
 				}
 			case command_types_enum::entry_mode_set:
 				{
 					instruction_impl = [ & ] {
-						bool dir = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
-						m_cursor_move_direction = static_cast<cursor_direction_enum>(dir);
+						bool dir		 = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
+						m_move_direction = static_cast<move_direction_enum>(dir);
 					};
 					break;
 				}
@@ -230,7 +228,19 @@ namespace lcd
 					instruction_impl = [ & ] { m_display_on = false; };
 					break;
 				}
-			case command_types_enum::cursor_or_display_shift: break;
+			case command_types_enum::cursor_or_display_shift:
+				{
+					instruction_impl = [ & ] {
+						move_direction_enum dir =
+							digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data2) ])
+								? move_direction_enum::right
+								: move_direction_enum::left;
+						cursor_shift(dir);
+						if (digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data3) ]))
+							display_shift(dir);
+					};
+					break;
+				}
 			case command_types_enum::function_set:
 				{
 					instruction_impl = [ & ] {
@@ -274,42 +284,15 @@ namespace lcd
 							case address_mode_enum::cgram:
 								{
 									m_cgram[ m_cgram_address_counter ] = data.data;
-									m_cgram_address_counter +=
-										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
-
-									if (m_cgram_address_counter >= m_cgram.size())
-										m_cgram_address_counter = 0;
-									else if (m_cgram_address_counter < 0)
-										m_cgram_address_counter = m_cgram.size() - 1;
-
+									cgram_shift(m_move_direction);
 									break;
 								}
 							case address_mode_enum::ddram:
 								{
 									m_ddram[ m_ddram_address_counter ] = data.data;
-									if (m_cursor_move_direction == cursor_direction_enum::increment)
-										{
-											++m_ddram_address_counter;
-
-											if (++m_hscroll >= 40)
-												{
-													m_hscroll -= 40;
-												}
-										}
-									else
-										{
-											--m_ddram_address_counter;
-											if (--m_hscroll < 0)
-												{
-													m_hscroll += 40;
-												}
-										}
-
-									if (m_ddram_address_counter >= m_ddram.size())
-										m_ddram_address_counter = 0;
-									else if (m_ddram_address_counter < 0)
-										m_ddram_address_counter = m_ddram.size() - 1;
-
+									cursor_shift(m_move_direction);
+									// TODO: the display should be shifted only if the flag is set
+									// display_shift(m_move_direction);
 									break;
 								}
 							}
@@ -324,28 +307,13 @@ namespace lcd
 							case address_mode_enum::cgram:
 								{
 									value_to_bus(m_cgram[ m_cgram_address_counter ]);
-
-									m_cgram_address_counter +=
-										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
-
-									if (m_cgram_address_counter >= m_cgram.size())
-										m_cgram_address_counter = 0;
-									else if (m_cgram_address_counter < 0)
-										m_cgram_address_counter = m_cgram.size() - 1;
-
+									cgram_shift(m_move_direction);
 									break;
 								}
 							case address_mode_enum::ddram:
 								{
 									value_to_bus(m_ddram[ m_ddram_address_counter ]);
-									m_ddram_address_counter +=
-										m_cursor_move_direction == cursor_direction_enum::increment ? 1 : -1;
-
-									if (m_ddram_address_counter >= m_ddram.size())
-										m_ddram_address_counter = 0;
-									else if (m_ddram_address_counter < 0)
-										m_ddram_address_counter = m_ddram.size() - 1;
-
+									cursor_shift(m_move_direction);
 									break;
 								}
 							}
@@ -370,6 +338,29 @@ namespace lcd
 		g_scheduler.add_task(executor, s_execution_time_map[ command_type ]);
 	}
 
+	void lcd_controller::cgram_shift(move_direction_enum dir)
+	{
+		m_cgram_address_counter += (dir == move_direction_enum::left) ? -1 : 1;
+		if (m_cgram_address_counter >= m_cgram.size())
+			m_cgram_address_counter = 0;
+		else if (m_cgram_address_counter < 0)
+			m_cgram_address_counter = m_cgram.size() - 1;
+	}
+
+	void lcd_controller::cursor_shift(move_direction_enum dir)
+	{
+		m_ddram_address_counter += (dir == move_direction_enum::left) ? -1 : 1;
+		if (m_ddram_address_counter >= m_ddram.size())
+			m_ddram_address_counter = 0;
+		else if (m_ddram_address_counter < 0)
+			m_ddram_address_counter = m_ddram.size() - 1;
+	}
+
+	void lcd_controller::display_shift(move_direction_enum dir)
+	{
+		m_scroll += (dir == move_direction_enum::left) ? -1 : 1;
+	}
+
 	char& lcd_controller::symbol_at_ddram(size_t address) { return m_ddram[ address ]; }
 
 	const char& lcd_controller::symbol_at_ddram(size_t address) const { return m_ddram[ address ]; }
@@ -381,6 +372,10 @@ namespace lcd
 	lcd_controller::display_lines_mode_enum lcd_controller::lines() const { return m_display_lines_mode; }
 
 	lcd_controller::fonts_enum lcd_controller::font() const { return m_font; }
+
+	size_t lcd_controller::cursor_position() const { return m_ddram_address_counter; }
+
+	int8_t lcd_controller::scroll_size() const { return m_scroll; }
 
 	void lcd_controller::value_to_bus(uint8_t value)
 	{
