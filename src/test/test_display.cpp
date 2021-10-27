@@ -141,6 +141,23 @@ namespace lcd
 		framework.stop();
 	}
 
+	BOOST_AUTO_TEST_CASE(set_ddram_address)
+	{
+		test_framework framework;
+		// 1s real = 1000us simulated
+		framework.set_prescaler(.001f);
+		framework.start();
+
+		framework.command(false, false, 0x85);
+		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.command(false, true, 0);
+		BOOST_CHECK_EQUAL(framework.read_bus(), 0x05);
+		framework.command(true, false, 'a');
+		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(0x05), 'a');
+		framework.stop();
+	}
+
 	BOOST_AUTO_TEST_CASE(busy_flag)
 	{
 		test_framework framework;

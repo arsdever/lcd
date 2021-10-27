@@ -190,6 +190,7 @@ namespace lcd
 						if (data.data & (1 << i))
 							{
 								command_type = static_cast<command_types_enum>(i);
+								break;
 							}
 					}
 			}
@@ -249,7 +250,14 @@ namespace lcd
 					break;
 				}
 			case command_types_enum::set_cgram_address: break;
-			case command_types_enum::set_ddram_address: break;
+			case command_types_enum::set_ddram_address:
+				{
+					instruction_impl = [ & ] {
+						m_address_mode			= address_mode::ddram;
+						m_ddram_address_counter = value_from_bus() & 0x7f;
+					};
+					break;
+				}
 			case command_types_enum::read_busy_flag_and_address: break;
 			case command_types_enum::write_data_to_cg_or_ddram:
 				{
@@ -357,19 +365,11 @@ namespace lcd
 
 	char& lcd_controller::symbol_at_ddram(size_t address)
 	{
-		assert(address >= 0x00 && address < 0x28 || address >= 0x40 && address < 0x68);
-		if (address > 0x27)
-			address -= 40;
-
 		return m_ddram[ address ];
 	}
 
 	const char& lcd_controller::symbol_at_ddram(size_t address) const
 	{
-		assert(address >= 0x00 && address < 0x28 || address >= 0x40 && address < 0x68);
-		if (address > 0x27)
-			address -= 40;
-
 		return m_ddram[ address ];
 	}
 
