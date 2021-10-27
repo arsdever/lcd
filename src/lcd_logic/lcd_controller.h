@@ -41,7 +41,7 @@ namespace lcd
 			read
 		};
 
-		enum class address_mode
+		enum class address_mode_enum
 		{
 			cgram,
 			ddram
@@ -161,7 +161,7 @@ namespace lcd
 		std::atomic<bool>		m_busy;
 		bool					m_display_on;
 		bool					m_scroll_direction;
-		address_mode			m_address_mode;
+		address_mode_enum		m_address_mode_enum;
 		std::array<char, 9920>	m_cgrom;
 		size_t					m_cgram_address_counter;
 		std::array<char, 64>	m_cgram;
