@@ -62,6 +62,10 @@ int main(int argc, char** argv)
 
 	std::chrono::time_point last_tick = std::chrono::system_clock::now();
 	std::thread([ = ]() {
+		instruction(*controller, 0, 0, 1);
+		instruction(*controller, 0, 0, 0b00001111);
+		instruction(*controller, 0, 0, 0b00111000);
+
 		for (int i = 0; i < 90; ++i)
 			{
 				instruction(*controller, 1, 0, i + 32);
