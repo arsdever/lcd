@@ -164,7 +164,7 @@ namespace lcd
 		bool					m_blink;
 		std::atomic<bool>		m_busy;
 		bool					m_display_on;
-		address_mode_enum		m_address_mode_enum;
+		address_mode_enum		m_address_mode;
 		std::array<char, 9920>	m_cgrom;
 		size_t					m_cgram_address_counter;
 		std::array<char, 64>	m_cgram;
