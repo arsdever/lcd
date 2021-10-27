@@ -109,11 +109,13 @@ namespace lcd
 		};
 
 	lcd_controller::lcd_controller()
-		: m_interface_type { interface_type_enum::undefined }, m_on_update_cb { nullptr }, m_vscroll { 0 },
-		  m_hscroll { 0 }, m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment },
-		  m_insert { false }, m_blink { false }, m_busy { false }, m_display_on { false }, m_lines { false },
-		  m_font { false }, m_scroll_direction { false }, m_address_mode { address_mode::ddram },
-		  m_cgram_address_counter { 0 }, m_cgram { 0 }, m_ddram_address_counter { 0 }, m_ddram { 0 }
+		: m_interface_type { interface_type_enum::eight_pin_interface },
+		  m_display_lines_mode { display_lines_mode_enum::single_line },
+		  m_font(fonts_enum::five_eight), m_on_update_cb { nullptr }, m_vscroll { 0 }, m_hscroll { 0 },
+		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment }, m_insert { false },
+		  m_blink { false }, m_busy { false }, m_display_on { false }, m_scroll_direction { false },
+		  m_address_mode { address_mode::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
+		  m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
 		m_port.m_pins[ static_cast<int>(pinout::en) ].on_edge_down(
@@ -228,7 +230,24 @@ namespace lcd
 					break;
 				}
 			case command_types_enum::cursor_or_display_shift: break;
-			case command_types_enum::function_set: break;
+			case command_types_enum::function_set:
+				{
+					instruction_impl = [ & ] {
+						m_interface_type	 = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data4) ])
+												   ? interface_type_enum::eight_pin_interface
+												   : interface_type_enum::four_pin_interface;
+						m_display_lines_mode = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data3) ])
+												   ? display_lines_mode_enum::double_line
+												   : display_lines_mode_enum::single_line;
+						if (m_display_lines_mode == display_lines_mode_enum::double_line)
+							m_font = fonts_enum::five_eight;
+						else
+							m_font = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data2) ])
+										 ? fonts_enum::five_eight
+										 : fonts_enum::five_ten;
+					};
+					break;
+				}
 			case command_types_enum::set_cgram_address: break;
 			case command_types_enum::set_ddram_address: break;
 			case command_types_enum::read_busy_flag_and_address: break;
@@ -355,6 +374,12 @@ namespace lcd
 	}
 
 	bool lcd_controller::is_busy() const { return m_busy; }
+
+	lcd_controller::interface_type_enum lcd_controller::interface() const { return m_interface_type; }
+
+	lcd_controller::display_lines_mode_enum lcd_controller::lines() const { return m_display_lines_mode; }
+
+	lcd_controller::fonts_enum lcd_controller::font() const { return m_font; }
 
 	void lcd_controller::value_to_bus(uint8_t value)
 	{
