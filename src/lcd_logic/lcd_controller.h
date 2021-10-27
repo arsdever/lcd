@@ -47,7 +47,7 @@ namespace lcd
 			ddram
 		};
 
-		enum class cursor_direction_enum : bool
+		enum class move_direction_enum : bool
 		{
 			decrement = 0,
 			increment = 1,
@@ -136,12 +136,17 @@ namespace lcd
 		interface_type_enum		interface_type() const;
 		display_lines_mode_enum lines() const;
 		fonts_enum				font() const;
+		size_t					cursor_position() const;
+		int8_t					scroll_size() const;
 
 	protected:
 		virtual void port_updated_callback(pinout p);
 		virtual void execute(execution_data const& data);
 
 	private:
+		void	cgram_shift(move_direction_enum dir);
+		void	cursor_shift(move_direction_enum dir);
+		void	display_shift(move_direction_enum dir);
 		void	on_enable_falling_edge();
 		void	value_to_bus(uint8_t value);
 		uint8_t value_from_bus();
@@ -152,15 +157,13 @@ namespace lcd
 		display_lines_mode_enum m_display_lines_mode;
 		fonts_enum				m_font;
 		on_update_delegate		m_on_update_cb;
-		size_t					m_hscroll;
-		size_t					m_vscroll;
+		int8_t					m_scroll;
 		bool					m_cursor_show;
-		cursor_direction_enum	m_cursor_move_direction;
+		move_direction_enum		m_move_direction;
 		bool					m_insert;
 		bool					m_blink;
 		std::atomic<bool>		m_busy;
 		bool					m_display_on;
-		bool					m_scroll_direction;
 		address_mode_enum		m_address_mode_enum;
 		std::array<char, 9920>	m_cgrom;
 		size_t					m_cgram_address_counter;

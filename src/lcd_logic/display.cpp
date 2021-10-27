@@ -34,11 +34,13 @@ namespace lcd
 				if (row % 2)
 					return ' ';
 
+				// TODO: the display scroll is not encounted
 				return m_controller->symbol_at_ddram(row / 2 * m_width + column);
 			}
 		else
 			{
-				return m_controller->symbol_at_ddram(row % 2 * 0x40 + row / 2 * m_width + column);
+				return m_controller->symbol_at_ddram(
+					row % 2 * 0x40 + (row / 2 * m_width + column + m_controller->scroll_size()) % (2 * m_width));
 			}
 	}
 
