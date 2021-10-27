@@ -13,9 +13,20 @@ namespace lcd
 	public:
 		enum class interface_type_enum
 		{
-			undefined,
 			four_pin_interface,
 			eight_pin_interface
+		};
+
+		enum class display_lines_mode_enum
+		{
+			single_line,
+			double_line
+		};
+
+		enum class fonts_enum
+		{
+			five_eight,
+			five_ten
 		};
 
 		enum class registers_mode_enum
@@ -127,30 +138,30 @@ namespace lcd
 		virtual void execute(execution_data const& data);
 
 	private:
-		void on_enable_falling_edge();
-		void value_to_bus(uint8_t value);
+		void	on_enable_falling_edge();
+		void	value_to_bus(uint8_t value);
 		uint8_t value_from_bus();
 
 	public:
-		port<16>			   m_port;
-		interface_type_enum	   m_interface_type;
-		on_update_delegate	   m_on_update_cb;
-		size_t				   m_hscroll;
-		size_t				   m_vscroll;
-		bool				   m_cursor_show;
-		cursor_direction_enum  m_cursor_move_direction;
-		bool				   m_insert;
-		bool				   m_blink;
-		std::atomic<bool>	   m_busy;
-		bool				   m_display_on;
-		bool				   m_lines;
-		bool				   m_font;
-		bool				   m_scroll_direction;
-		address_mode		   m_address_mode;
-		std::array<char, 9920> m_cgrom;
-		size_t				   m_cgram_address_counter;
-		std::array<char, 64>   m_cgram;
-		size_t				   m_ddram_address_counter;
-		std::array<char, 80>   m_ddram;
+		port<16>				m_port;
+		interface_type_enum		m_interface_type;
+		display_lines_mode_enum m_display_lines_mode;
+		fonts_enum				m_font;
+		on_update_delegate		m_on_update_cb;
+		size_t					m_hscroll;
+		size_t					m_vscroll;
+		bool					m_cursor_show;
+		cursor_direction_enum	m_cursor_move_direction;
+		bool					m_insert;
+		bool					m_blink;
+		std::atomic<bool>		m_busy;
+		bool					m_display_on;
+		bool					m_scroll_direction;
+		address_mode			m_address_mode;
+		std::array<char, 9920>	m_cgrom;
+		size_t					m_cgram_address_counter;
+		std::array<char, 64>	m_cgram;
+		size_t					m_ddram_address_counter;
+		std::array<char, 80>	m_ddram;
 	};
 } // namespace lcd
