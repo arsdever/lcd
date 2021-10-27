@@ -114,7 +114,7 @@ namespace lcd
 		  m_font(fonts_enum::five_eight), m_on_update_cb { nullptr }, m_vscroll { 0 }, m_hscroll { 0 },
 		  m_cursor_show { false }, m_cursor_move_direction { cursor_direction_enum::increment }, m_insert { false },
 		  m_blink { false }, m_busy { false }, m_display_on { false }, m_scroll_direction { false },
-		  m_address_mode { address_mode::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
+		  m_address_mode_enum { address_mode_enum::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
 		  m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
@@ -152,10 +152,10 @@ namespace lcd
 		// about the busy state of te controller and doesn't contribute into it.
 		if (!is_rs_mode && is_rw_mode)
 			{
-				switch (m_address_mode)
+				switch (m_address_mode_enum)
 					{
-					case address_mode::cgram: value_to_bus(m_cgram_address_counter); break;
-					case address_mode::ddram: value_to_bus(m_ddram_address_counter); break;
+					case address_mode_enum::cgram: value_to_bus(m_cgram_address_counter); break;
+					case address_mode_enum::ddram: value_to_bus(m_ddram_address_counter); break;
 					}
 
 				digital_operation::write(m_port.m_pins[ static_cast<int>(pinout::data7) ], is_busy());
@@ -252,7 +252,7 @@ namespace lcd
 			case command_types_enum::set_cgram_address:
 				{
 					instruction_impl = [ & ] {
-						m_address_mode			= address_mode::cgram;
+						m_address_mode_enum		= address_mode_enum::cgram;
 						m_cgram_address_counter = value_from_bus() & 0x3f;
 					};
 					break;
@@ -260,7 +260,7 @@ namespace lcd
 			case command_types_enum::set_ddram_address:
 				{
 					instruction_impl = [ & ] {
-						m_address_mode			= address_mode::ddram;
+						m_address_mode_enum		= address_mode_enum::ddram;
 						m_ddram_address_counter = value_from_bus() & 0x7f;
 					};
 					break;
@@ -269,9 +269,9 @@ namespace lcd
 			case command_types_enum::write_data_to_cg_or_ddram:
 				{
 					instruction_impl = [ &, data ] {
-						switch (m_address_mode)
+						switch (m_address_mode_enum)
 							{
-							case address_mode::cgram:
+							case address_mode_enum::cgram:
 								{
 									m_cgram[ m_cgram_address_counter ] = data.data;
 									m_cgram_address_counter +=
@@ -284,7 +284,7 @@ namespace lcd
 
 									break;
 								}
-							case address_mode::ddram:
+							case address_mode_enum::ddram:
 								{
 									m_ddram[ m_ddram_address_counter ] = data.data;
 									if (m_cursor_move_direction == cursor_direction_enum::increment)
@@ -319,9 +319,9 @@ namespace lcd
 			case command_types_enum::read_data_from_cg_or_ddram:
 				{
 					instruction_impl = [ & ] {
-						switch (m_address_mode)
+						switch (m_address_mode_enum)
 							{
-							case address_mode::cgram:
+							case address_mode_enum::cgram:
 								{
 									value_to_bus(m_cgram[ m_cgram_address_counter ]);
 
@@ -335,7 +335,7 @@ namespace lcd
 
 									break;
 								}
-							case address_mode::ddram:
+							case address_mode_enum::ddram:
 								{
 									value_to_bus(m_ddram[ m_ddram_address_counter ]);
 									m_ddram_address_counter +=
