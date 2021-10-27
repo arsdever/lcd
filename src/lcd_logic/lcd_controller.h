@@ -133,6 +133,10 @@ namespace lcd
 		const char& symbol_at_ddram(size_t address) const;
 		bool		is_busy() const;
 
+		interface_type_enum		interface_type() const;
+		display_lines_mode_enum lines() const;
+		fonts_enum				font() const;
+
 	protected:
 		virtual void port_updated_callback(pinout p);
 		virtual void execute(execution_data const& data);
