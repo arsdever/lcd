@@ -375,7 +375,7 @@ namespace lcd
 
 	bool lcd_controller::is_busy() const { return m_busy; }
 
-	lcd_controller::interface_type_enum lcd_controller::interface() const { return m_interface_type; }
+	lcd_controller::interface_type_enum lcd_controller::interface_type() const { return m_interface_type; }
 
 	lcd_controller::display_lines_mode_enum lcd_controller::lines() const { return m_display_lines_mode; }
 
