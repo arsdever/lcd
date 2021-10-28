@@ -110,10 +110,10 @@ namespace lcd
 
 	lcd_controller::lcd_controller()
 		: m_interface_type { interface_type_enum::eight_pin_interface },
-		  m_display_lines_mode { display_lines_mode_enum::single_line },
-		  m_font(fonts_enum::five_eight), m_on_update_cb { nullptr }, m_scroll { 0 }, m_cursor_show { false },
-		  m_move_direction { move_direction_enum::increment }, m_insert { false }, m_blink { false }, m_busy { false },
-		  m_display_on { false }, m_address_mode { address_mode_enum::ddram },
+		  m_display_lines_mode { display_lines_mode_enum::single_line }, m_font { fonts_enum::five_eight },
+		  m_display_scroll_mode { display_scroll_mode_enum::no_scroll }, m_on_update_cb { nullptr }, m_scroll { 0 },
+		  m_cursor_show { false }, m_move_direction { move_direction_enum::increment }, m_insert { false },
+		  m_blink { false }, m_busy { false }, m_display_on { false }, m_address_mode { address_mode_enum::ddram },
 		  m_cgram_address_counter { 0 }, m_cgram { 0 }, m_ddram_address_counter { 0 }, m_ddram { 0 }
 	{
 		init_default_font(m_cgrom.data());
@@ -220,8 +220,13 @@ namespace lcd
 			case command_types_enum::entry_mode_set:
 				{
 					instruction_impl = [ & ] {
-						bool dir		 = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ]);
-						m_move_direction = static_cast<move_direction_enum>(dir);
+						m_move_direction = digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ])
+											   ? move_direction_enum::increment
+											   : move_direction_enum::decrement;
+						m_display_scroll_mode =
+							digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ])
+								? display_scroll_mode_enum::scrolling
+								: display_scroll_mode_enum::no_scroll;
 					};
 					break;
 				}
@@ -294,7 +299,8 @@ namespace lcd
 									m_ddram[ m_ddram_address_counter ] = data.data;
 									cursor_shift(m_move_direction);
 									// TODO: the display should be shifted only if the flag is set
-									// display_shift(m_move_direction);
+									if (m_display_scroll_mode == display_scroll_mode_enum::scrolling)
+										display_shift(m_move_direction);
 									break;
 								}
 							}

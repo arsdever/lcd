@@ -47,6 +47,12 @@ namespace lcd
 			ddram
 		};
 
+		enum class display_scroll_mode_enum
+		{
+			no_scroll,
+			scrolling
+		};
+
 		enum class move_direction_enum : bool
 		{
 			decrement = 0,
