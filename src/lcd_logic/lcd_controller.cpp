@@ -201,8 +201,10 @@ namespace lcd
 			case command_types_enum::clear:
 				{
 					instruction_impl = [ & ] {
-						std::memset(m_ddram.data(), ' ', m_ddram.size());
+						std::memset(m_ddram.data(), 0x20, m_ddram.size());
 						m_ddram_address_counter = 0x00;
+						m_scroll				= 0;
+						m_move_direction		= move_direction_enum::increment;
 					};
 					break;
 				}
