@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 	std::thread([ = ]() {
 		instruction(*controller, 0, 0, 1);
 		std::this_thread::sleep_for(std::chrono::milliseconds(160));
-		instruction(*controller, 0, 0, 0b00001111);
+		instruction(*controller, 0, 0, 0b00001100);
 		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 		instruction(*controller, 0, 0, 0b00111000);
 		std::this_thread::sleep_for(std::chrono::milliseconds(4));
@@ -109,11 +109,30 @@ int main(int argc, char** argv)
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		instruction(*controller, 0, 0, 0b00011000);
 		std::this_thread::sleep_for(std::chrono::seconds(1));
+		tmr->set_prescaler(1.f);
 		for (int i = 0; i < 256; ++i)
 			{
 				instruction(*controller, 0, 0, 0b00011000);
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		instruction(*controller, 0, 0, 0b00000001);
+		std::this_thread::sleep_for(std::chrono::milliseconds(160));
+		instruction(*controller, 0, 0, 0b00001111);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		std::string short_text = "Short text";
+		for (char c : short_text)
+			{
+				instruction(*controller, 1, 0, c);
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		instruction(*controller, 0, 0, 0b00001110);
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		instruction(*controller, 0, 0, 0b00001100);
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		instruction(*controller, 0, 0, 0b00001101);
+		std::this_thread::sleep_for(std::chrono::seconds(5));
 	}).detach();
 	std::thread scheduler_loop([ &last_tick ] {
 		g_scheduler.start();

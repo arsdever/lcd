@@ -53,6 +53,31 @@ namespace lcd
 			scrolling
 		};
 
+		enum class display_state_enum
+		{
+			off,
+			on
+		};
+
+		enum class cursor_visibility_enum
+		{
+			not_visible,
+			visible
+		};
+
+		enum class blink_mode_enum
+		{
+			not_blinking,
+			blinking
+		};
+
+		enum class cursor_mode_enum
+		{
+			none,
+			line,
+			box
+		};
+
 		enum class move_direction_enum : bool
 		{
 			decrement = 0,
@@ -144,6 +169,7 @@ namespace lcd
 		fonts_enum				font() const;
 		size_t					cursor_position() const;
 		int8_t					scroll_size() const;
+		cursor_mode_enum		cursor_state() const;
 
 	protected:
 		virtual void port_updated_callback(pinout p);
@@ -156,6 +182,7 @@ namespace lcd
 		void	on_enable_falling_edge();
 		void	value_to_bus(uint8_t value);
 		uint8_t value_from_bus();
+		void	toggle_blink();
 
 	public:
 		port<16>				 m_port;
@@ -165,12 +192,13 @@ namespace lcd
 		display_scroll_mode_enum m_display_scroll_mode;
 		on_update_delegate		 m_on_update_cb;
 		int8_t					 m_scroll;
-		bool					 m_cursor_show;
+		display_state_enum		 m_display_state;
+		cursor_visibility_enum	 m_cursor_visibility;
+		blink_mode_enum			 m_blink_mode;
+		cursor_mode_enum		 m_cursor_mode;
 		move_direction_enum		 m_move_direction;
 		bool					 m_insert;
-		bool					 m_blink;
 		std::atomic<bool>		 m_busy;
-		bool					 m_display_on;
 		address_mode_enum		 m_address_mode;
 		std::array<char, 9920>	 m_cgrom;
 		size_t					 m_cgram_address_counter;
