@@ -158,23 +158,24 @@ namespace lcd
 		uint8_t value_from_bus();
 
 	public:
-		port<16>				m_port;
-		interface_type_enum		m_interface_type;
-		display_lines_mode_enum m_display_lines_mode;
-		fonts_enum				m_font;
-		on_update_delegate		m_on_update_cb;
-		int8_t					m_scroll;
-		bool					m_cursor_show;
-		move_direction_enum		m_move_direction;
-		bool					m_insert;
-		bool					m_blink;
-		std::atomic<bool>		m_busy;
-		bool					m_display_on;
-		address_mode_enum		m_address_mode;
-		std::array<char, 9920>	m_cgrom;
-		size_t					m_cgram_address_counter;
-		std::array<char, 64>	m_cgram;
-		size_t					m_ddram_address_counter;
-		std::array<char, 128>	m_ddram;
+		port<16>				 m_port;
+		interface_type_enum		 m_interface_type;
+		display_lines_mode_enum	 m_display_lines_mode;
+		fonts_enum				 m_font;
+		display_scroll_mode_enum m_display_scroll_mode;
+		on_update_delegate		 m_on_update_cb;
+		int8_t					 m_scroll;
+		bool					 m_cursor_show;
+		move_direction_enum		 m_move_direction;
+		bool					 m_insert;
+		bool					 m_blink;
+		std::atomic<bool>		 m_busy;
+		bool					 m_display_on;
+		address_mode_enum		 m_address_mode;
+		std::array<char, 9920>	 m_cgrom;
+		size_t					 m_cgram_address_counter;
+		std::array<char, 64>	 m_cgram;
+		size_t					 m_ddram_address_counter;
+		std::array<char, 128>	 m_ddram;
 	};
 } // namespace lcd
