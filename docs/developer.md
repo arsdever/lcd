@@ -20,8 +20,8 @@ On windows, you might want to use one or some of the following IDEs
 - or whatever you find more convenient for you
 
 #### 2.1.1 Visual Studio
-If you have `Visual Studio` installed, than the `CMake` configuration should be automated.
-Just make sure to update `CMake toolchain file` property in the `CMakeSettings.json`.
+If you have `Visual Studio` installed then the `CMake` configuration should be automated.
+Just make sure to update the `CMake toolchain file` property in the `CMakeSettings.json`.
 
 #### 2.1.2 Others
 ```
@@ -30,4 +30,3 @@ mkdir build
 cd build
 cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH="<path_to_vcpkg_repo>/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE:STRING="<configuration>" -G "Ninja" -DBUILD_TESTS:BOOL="True" .. 
 ```
-
