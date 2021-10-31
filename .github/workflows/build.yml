@@ -1,0 +1,41 @@
+name: Building and testing the project
+
+on:
+  push:
+    branches: [ ci_*, main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ "windows-latest" ]
+        platform: [ "x86", "x64" ]
+        configuration: [ "debug", "release" ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.configuration}} \
+        -DCMAKE_INSTALL_PREFIX:PATH="${{github.workspace}}/build/install/${{matrix.configuration}}_${{matrix.platrofm}}" \
+        -DCMAKE_TOOLCHAIN_FILE="scripts/buildsystems/vcpkg.cmake$${env.VCPKG_INSTALLATION_ROOT}"
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.configuration}}
+
+    #- name: Test
+    #  working-directory: ${{github.workspace}}/build
+    #  # Execute tests defined by the CMake configuration.  
+    #  # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #  run: ctest -C ${{matrix.configuration}}
