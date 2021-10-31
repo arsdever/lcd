@@ -31,7 +31,7 @@ jobs:
         -S ${{github.workspace}} \
         -DCMAKE_BUILD_TYPE=${{matrix.configuration}} \
         -DCMAKE_INSTALL_PREFIX:PATH="${{github.workspace}}/build/install/${{matrix.configuration}}_${{matrix.platrofm}}" \
-        -DCMAKE_TOOLCHAIN_FILE="scripts/buildsystems/vcpkg.cmake$${env.VCPKG_INSTALLATION_ROOT}}"
+        -DCMAKE_TOOLCHAIN_FILE="${{env.VCPKG_INSTALLATION_ROOT}}/scripts/buildsystems/vcpkg.cmake"
 
     - name: Build
       # Build your program with the given configuration
