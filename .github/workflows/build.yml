@@ -16,14 +16,14 @@ jobs:
     strategy:
       matrix:
         os: [ "windows-latest" ]
-        platform: [ "x86", "x64" ]
+        platform: [ "x64" ]
         configuration: [ "debug", "release" ]
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Install packages
-      run: vcpkg install qt5-base:${{platform}}-windows boost-test:${{platform}}-windows spdlog:${{platform}}-windows
+      run: vcpkg install qt5-base:${{matrix.platform}}-windows boost-test:${{matrix.platform}}-windows spdlog:${{matrix.platform}}-windows
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
