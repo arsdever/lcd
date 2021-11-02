@@ -18,7 +18,7 @@ namespace lcd
 		virtual void set_prescaler(double prescaler) override;
 
 	private:
-		std::chrono::high_resolution_clock::time_point m_creation_timepoint;
+		std::chrono::duration<double> m_elapsed_time;
 		std::chrono::high_resolution_clock::time_point m_last_tick;
 		std::chrono::duration<double>				   m_delta;
 		double										   m_prescaler;

@@ -4,10 +4,13 @@
 
 #include "qt_display.h"
 
+#include <cmath>
 #include <logger.h>
 #include <qhboxlayout>
+#include <qslider>
 #include <qstatusbar>
 #include <qtimer>
+#include <qtoolbar>
 
 namespace lcd
 {
@@ -34,6 +37,16 @@ namespace lcd
 			}
 
 		m_fps_timer->start();
+
+		m_simulation_speed_slider = new QSlider();
+		QToolBar* toolbar		  = new QToolBar();
+		addToolBar(toolbar);
+
+		toolbar->addWidget(m_simulation_speed_slider);
+		m_simulation_speed_slider->setMinimum(-12);
+		m_simulation_speed_slider->setMaximum(0);
+		m_simulation_speed_slider->setValue(-6);
+		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 	}
 
 	void app_main_window::update_status_bar()
@@ -66,7 +79,18 @@ namespace lcd
 						suffix = "ms";
 					}
 
-				sb->showMessage(tr("delta time: %1 %2 size: (%3, %4)").arg(elapsed).arg(suffix.c_str()).arg(width()).arg(height()));
+				sb->showMessage(tr("delta time: %1 %2 prescaler: %3")
+									.arg(elapsed)
+									.arg(suffix.c_str())
+									.arg(pow(10, m_simulation_speed_slider->value())));
+			}
+	}
+
+	void app_main_window::update_simulation_speed()
+	{
+		if (i_timer_ptr timer = m_simulation_timer.lock())
+			{
+				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
 			}
 	}
 } // namespace lcd
