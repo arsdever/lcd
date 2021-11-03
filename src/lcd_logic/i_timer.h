@@ -39,5 +39,9 @@ namespace lcd
 		///
 		/// @param prescaler the value to be set.
 		virtual void set_prescaler(double prescaler) = 0;
+
+		/// @brief Get the prescaler currently set on the timer.
+		/// @return the prescaler
+		virtual double prescaler() const = 0;
 	};
 } // namespace lcd

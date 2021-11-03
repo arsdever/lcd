@@ -4,10 +4,14 @@
 
 #include "qt_display.h"
 
+#include <cmath>
 #include <logger.h>
 #include <qhboxlayout>
+#include <qslider>
 #include <qstatusbar>
 #include <qtimer>
+#include <qtoolbar>
+#include <timer_helper_functions.h>
 
 namespace lcd
 {
@@ -34,6 +38,17 @@ namespace lcd
 			}
 
 		m_fps_timer->start();
+
+		m_simulation_speed_slider = new QSlider();
+		QToolBar* toolbar		  = new QToolBar();
+		addToolBar(toolbar);
+
+		toolbar->addWidget(m_simulation_speed_slider);
+		m_simulation_speed_slider->setMinimum(-12);
+		m_simulation_speed_slider->setMaximum(0);
+		m_simulation_speed_slider->setValue(-6);
+		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
+		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 	}
 
 	void app_main_window::update_status_bar()
@@ -48,25 +63,19 @@ namespace lcd
 
 		if (auto timer = m_simulation_timer.lock())
 			{
-				double		elapsed = timer->elapsed().count();
-				std::string suffix	= "s";
-				if (elapsed < .000001)
-					{
-						elapsed *= 1000000000.0f;
-						suffix = "ns";
-					}
-				else if (elapsed < .001)
-					{
-						elapsed *= 1000000.0f;
-						suffix = "us";
-					}
-				else if (elapsed < 1)
-					{
-						elapsed *= 1000.0f;
-						suffix = "ms";
-					}
+				double elapsed = timer->elapsed().count();
 
-				sb->showMessage(tr("delta time: %1 %2 size: (%3, %4)").arg(elapsed).arg(suffix.c_str()).arg(width()).arg(height()));
+				sb->showMessage(tr("delta time: %1 prescaler: %2")
+									.arg(time_string(elapsed).c_str())
+									.arg(time_string(pow(10, m_simulation_speed_slider->value()), 1).c_str()));
+			}
+	}
+
+	void app_main_window::update_simulation_speed()
+	{
+		if (i_timer_ptr timer = m_simulation_timer.lock())
+			{
+				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
 			}
 	}
 } // namespace lcd

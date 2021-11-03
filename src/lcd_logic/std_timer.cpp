@@ -5,25 +5,24 @@
 namespace lcd
 {
 	std_timer::std_timer()
-		: m_creation_timepoint(std::chrono::high_resolution_clock::now()),
-		  m_last_tick { m_creation_timepoint }, m_delta { 0 }, m_prescaler { 1 }
+		: m_elapsed_time {}, m_last_tick { std::chrono::high_resolution_clock::now() }, m_delta { 0 }, m_prescaler { 1 }
 	{
 	}
 
-	std::chrono::duration<double> std_timer::elapsed() const
-	{
-		return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - m_creation_timepoint) *
-			   m_prescaler;
-	}
+	std::chrono::duration<double> std_timer::elapsed() const { return m_elapsed_time; }
 
 	void std_timer::frame()
 	{
-		std::chrono::duration t = std::chrono::high_resolution_clock::now() - m_last_tick;
+		std::chrono::duration t	   = std::chrono::high_resolution_clock::now() - m_last_tick;
+		std::chrono::duration diff = std::chrono::duration<double>(t) * m_prescaler;
+		m_elapsed_time += diff;
 		m_last_tick += t;
-		m_delta = std::chrono::duration<double>(t) * m_prescaler;
+		m_delta = diff;
 	}
 
 	std::chrono::duration<double> std_timer::delta() const { return m_delta; }
 
 	void std_timer::set_prescaler(double prescaler) { m_prescaler = prescaler; }
+
+	double std_timer::prescaler() const { return m_prescaler; }
 } // namespace lcd
