@@ -23,4 +23,6 @@ namespace lcd
 	std::chrono::duration<double> std_timer::delta() const { return m_delta; }
 
 	void std_timer::set_prescaler(double prescaler) { m_prescaler = prescaler; }
+
+	double std_timer::prescaler() const { return m_prescaler; }
 } // namespace lcd
