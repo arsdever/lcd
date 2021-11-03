@@ -11,6 +11,7 @@
 #include <qstatusbar>
 #include <qtimer>
 #include <qtoolbar>
+#include <timer_helper_functions.h>
 
 namespace lcd
 {
@@ -62,28 +63,11 @@ namespace lcd
 
 		if (auto timer = m_simulation_timer.lock())
 			{
-				double		elapsed = timer->elapsed().count();
-				std::string suffix	= "s";
-				if (elapsed < .000001)
-					{
-						elapsed *= 1000000000.0f;
-						suffix = "ns";
-					}
-				else if (elapsed < .001)
-					{
-						elapsed *= 1000000.0f;
-						suffix = "us";
-					}
-				else if (elapsed < 1)
-					{
-						elapsed *= 1000.0f;
-						suffix = "ms";
-					}
+				double elapsed = timer->elapsed().count();
 
-				sb->showMessage(tr("delta time: %1 %2 prescaler: %3")
-									.arg(elapsed)
-									.arg(suffix.c_str())
-									.arg(pow(10, m_simulation_speed_slider->value())));
+				sb->showMessage(tr("delta time: %1 prescaler: %2")
+									.arg(time_string(elapsed).c_str())
+									.arg(time_string(pow(10, m_simulation_speed_slider->value()), 1).c_str()));
 			}
 	}
 
