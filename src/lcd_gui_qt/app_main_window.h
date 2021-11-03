@@ -4,6 +4,7 @@
 #include <qmainwindow>
 
 class QTimer;
+class QSlider;
 
 namespace lcd
 {
@@ -21,12 +22,14 @@ namespace lcd
 
 	private slots:
 		void update_status_bar();
+		void update_simulation_speed();
 
 	private:
 		QMetaObject::Connection m_status_bar_update_connection;
 		i_timer_wptr			m_simulation_timer;
 		QTimer*					m_fps_timer;
 		qt_display*				m_display;
+		QSlider*				m_simulation_speed_slider;
 		float					m_fps;
 	};
 } // namespace lcd
