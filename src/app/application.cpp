@@ -18,7 +18,6 @@ int main(int argc, char** argv)
 	QApplication app(argc, argv);
 
 	lcd::i_timer_ptr tmr = std::make_shared<lcd::std_timer>();
-	tmr->set_prescaler(g_timing_ratio);
 
 	g_scheduler.set_timer(tmr);
 
