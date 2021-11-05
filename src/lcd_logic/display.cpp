@@ -8,7 +8,7 @@ namespace lcd
 {
 	display::display(size_t width, size_t height) : m_width(width), m_height(height), m_visual(width * height + 1) { }
 
-	void display::update() { }
+	void display::update(update_reason_enum reason) { }
 
 	char& display::symbol_at(size_t row, size_t column)
 	{
@@ -64,7 +64,7 @@ namespace lcd
 	void display::set_controller(lcd_controller_ptr controller)
 	{
 		m_controller = controller;
-		controller->register_for_updates([ = ]() { update(); });
+		controller->register_for_updates([ = ]() { update(update_reason_enum::general_update); });
 	}
 
 #pragma region i_character_data
@@ -72,7 +72,7 @@ namespace lcd
 	void display::set_char_at(size_t row, size_t column, char ch)
 	{
 		symbol_at(row, column) = ch;
-		update();
+		update(update_reason_enum::content_changed);
 	}
 
 	char display::get_char_at(size_t row, size_t column) const { return symbol_at(row, column); }

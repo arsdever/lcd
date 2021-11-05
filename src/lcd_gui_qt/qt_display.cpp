@@ -72,7 +72,7 @@ namespace lcd
 
 #pragma region display
 
-	void qt_display::update() { QWidget::update(); }
+	void qt_display::update(update_reason_enum reason) { QWidget::update(); }
 
 #pragma endregion display
 } // namespace lcd

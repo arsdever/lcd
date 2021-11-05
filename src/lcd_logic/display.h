@@ -10,12 +10,20 @@ namespace lcd
 	class display : public i_character_data
 	{
 	public:
+		enum class update_reason_enum
+		{
+			general_update,
+			content_changed,
+			brightness_changed,
+			pin_state_changed
+		};
+
+	public:
 		display(size_t width, size_t height);
 		virtual ~display() = default;
 
-		virtual void update();
+		virtual void update(update_reason_enum reason);
 
-	public:
 		void set_controller(lcd_controller_ptr controller);
 
 	protected:

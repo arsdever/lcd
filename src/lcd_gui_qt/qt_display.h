@@ -26,7 +26,7 @@ namespace lcd
 
 #pragma region display
 
-		virtual void update() override;
+		virtual void update(update_reason_enum reason) override;
 
 #pragma endregion display
 
