@@ -49,6 +49,7 @@ namespace lcd
 		m_simulation_speed_slider->setValue(-6);
 		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
 		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
+		update_simulation_speed();
 	}
 
 	void app_main_window::update_status_bar()
