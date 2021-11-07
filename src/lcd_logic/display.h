@@ -19,12 +19,16 @@ namespace lcd
 		};
 
 	public:
+		using event_t = std::function<void()>;
+
+	public:
 		display(size_t width, size_t height);
 		virtual ~display() = default;
 
 		virtual void update(update_reason_enum reason);
 
 		void set_controller(lcd_controller_ptr controller);
+		void on_controller_changed(event_t callback);
 
 	protected:
 		virtual uint8_t		address_of_symbol(size_t row, size_t column) const;
@@ -45,5 +49,6 @@ namespace lcd
 		size_t			   m_height;
 		std::vector<char>  m_visual;
 		lcd_controller_ptr m_controller;
+		event_t			   m_on_controller_changed;
 	};
 } // namespace lcd

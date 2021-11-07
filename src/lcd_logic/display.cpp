@@ -61,10 +61,15 @@ namespace lcd
 			}
 	}
 
+	void display::on_controller_changed(event_t callback) { m_on_controller_changed = callback; }
+
 	void display::set_controller(lcd_controller_ptr controller)
 	{
 		m_controller = controller;
 		controller->register_for_updates([ = ]() { update(update_reason_enum::general_update); });
+
+		if (m_on_controller_changed)
+			m_on_controller_changed();
 	}
 
 #pragma region i_character_data

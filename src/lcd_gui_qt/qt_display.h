@@ -32,5 +32,6 @@ namespace lcd
 
 	private:
 		std::vector<i_lcd_drawer_ptr> m_drawers;
+		QWidget*					  m_port_widget;
 	};
 } // namespace lcd
