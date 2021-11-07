@@ -3,12 +3,20 @@
 #include "lcd_background_drawer.h"
 #include "lcd_content_drawer.h"
 #include "lcd_draw_properties.h"
+#include "port_widget.h"
 
 #include <QPaintEvent>
 #include <qpainter.h>
 
 namespace lcd
 {
+#define CHECK_CONTROLLER(action)                                                                                       \
+	lcd_controller_ptr ctrl = m_controller.lock();                                                                     \
+	if (!ctrl)                                                                                                         \
+		{                                                                                                              \
+			action;                                                                                                    \
+		}
+
 	constexpr float	   ce_pixel_size { 3 };
 	constexpr float	   ce_pixel_spacing { .4f };
 	constexpr float	   ce_char_width { 5 };
@@ -21,6 +29,12 @@ namespace lcd
 	{
 		m_drawers.push_back(std::move(std::make_shared<lcd_background_drawer>()));
 		m_drawers.push_back(std::move(std::make_shared<lcd_content_drawer>()));
+		on_controller_changed([ = ] {
+			CHECK_CONTROLLER();
+			m_port_widget =
+				new port_widget(ctrl->m_port.m_pins.data(), ctrl->m_port.m_pins.size(), this);
+			m_port_widget->move(0, 0);
+		});
 	}
 
 #pragma region QWidget
@@ -32,7 +46,7 @@ namespace lcd
 		QSizeF result	 = QSizeF { m_width * (char_size.width() + ce_char_hspacing) - ce_char_hspacing,
 									m_height * (char_size.height() + ce_char_vspacing) - ce_char_vspacing } +
 						QSizeF { ce_padding.left() + ce_padding.right(), ce_padding.top() + ce_padding.bottom() };
-		return QSize(result.width(), result.height());
+		return QSize(result.width(), result.height() + m_port_widget->height());
 	}
 
 	void qt_display::paintEvent(QPaintEvent* e)
@@ -72,7 +86,11 @@ namespace lcd
 
 #pragma region display
 
-	void qt_display::update() { QWidget::update(); }
+	void qt_display::update(update_reason_enum reason)
+	{
+		m_port_widget->update();
+		QWidget::update();
+	}
 
 #pragma endregion display
 } // namespace lcd
