@@ -126,6 +126,17 @@ namespace lcd
 
 	void lcd_controller::register_for_updates(on_update_delegate callback) { m_on_update_cb = callback; }
 
+	void lcd_controller::register_for_port_updates(on_update_delegate callback)
+	{
+		if (!callback)
+			return;
+
+		for (pin& p : m_port.m_pins)
+			{
+				p.on_voltage_changed(callback);
+			}
+	}
+
 	void lcd_controller::port_updated_callback(pinout p) { }
 
 	void lcd_controller::on_enable_falling_edge()

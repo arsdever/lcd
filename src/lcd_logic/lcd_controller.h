@@ -160,6 +160,7 @@ namespace lcd
 		virtual ~lcd_controller() = default;
 
 		void		register_for_updates(on_update_delegate callback);
+		void		register_for_port_updates(on_update_delegate callback);
 		char&		symbol_at_ddram(size_t address);
 		const char& symbol_at_ddram(size_t address) const;
 		bool		is_busy() const;
