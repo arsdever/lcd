@@ -71,7 +71,7 @@ namespace lcd
 		m_controller = controller;
 		if (lcd_controller_ptr ctr = m_controller.lock())
 			{
-				ctr->register_for_updates([ = ]() { update(update_reason_enum::general_update); });
+				ctr->register_for_updates([ & ]() { update(update_reason_enum::general_update); });
 			}
 
 		if (m_on_controller_changed)
