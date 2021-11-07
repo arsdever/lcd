@@ -10,6 +10,13 @@
 
 namespace lcd
 {
+#define CHECK_CONTROLLER(action)                                                                                       \
+	lcd_controller_ptr ctrl = m_controller.lock();                                                                     \
+	if (!ctrl)                                                                                                         \
+		{                                                                                                              \
+			action;                                                                                                    \
+		}
+
 	constexpr float	   ce_pixel_size { 3 };
 	constexpr float	   ce_pixel_spacing { .4f };
 	constexpr float	   ce_char_width { 5 };
@@ -23,8 +30,9 @@ namespace lcd
 		m_drawers.push_back(std::move(std::make_shared<lcd_background_drawer>()));
 		m_drawers.push_back(std::move(std::make_shared<lcd_content_drawer>()));
 		on_controller_changed([ = ] {
+			CHECK_CONTROLLER();
 			m_port_widget =
-				new port_widget(m_controller->m_port.m_pins.data(), m_controller->m_port.m_pins.size(), this);
+				new port_widget(ctrl->m_port.m_pins.data(), ctrl->m_port.m_pins.size(), this);
 			m_port_widget->move(0, 0);
 		});
 	}
