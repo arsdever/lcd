@@ -26,11 +26,12 @@ namespace lcd
 
 #pragma region display
 
-		virtual void update() override;
+		virtual void update(update_reason_enum reason) override;
 
 #pragma endregion display
 
 	private:
 		std::vector<i_lcd_drawer_ptr> m_drawers;
+		QWidget*					  m_port_widget;
 	};
 } // namespace lcd
