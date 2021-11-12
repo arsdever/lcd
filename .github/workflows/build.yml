@@ -1,0 +1,49 @@
+name: Building and testing the project
+
+on:
+  push:
+    branches: [ ci_*, main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ "windows-latest" ]
+        platform: [ "x64" ]
+        configuration: [ "debug", "release" ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Check cached packages
+      id: cache-pkg
+      uses: actions/cache@v2
+      with:
+        path: C:/vcpkg/installed
+        key: ${{ runner.os }}-${{ runner.platform }}-pkgs
+
+    - name: Install packages
+      if: steps.cache-pkg.outputs.cache-hit != 'true'
+      run: vcpkg install qt5-base:${{ matrix.platform }}-windows boost-test:${{ matrix.platform }}-windows spdlog:${{ matrix.platform }}-windows
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake \
+        -B ${{github.workspace}}/build \
+        -S ${{github.workspace}} \
+        -DCMAKE_BUILD_TYPE=${{matrix.configuration}} \
+        -DCMAKE_INSTALL_PREFIX:PATH="${{github.workspace}}/build/install/${{matrix.configuration}}_${{matrix.platrofm}}" \
+        -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.configuration}}
