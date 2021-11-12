@@ -39,8 +39,15 @@ int main(int argc, char** argv)
 	g_scheduler.set_timer(tmr);
 
 	lcd::qt_display*		panel = new lcd::qt_display {};
-	lcd::app_main_window	window(60.0f, tmr, panel);
+	lcd::app_main_window	window(60.0f, tmr);
 	lcd::lcd_controller_ptr controller = std::move(std::make_shared<lcd::lcd_controller>());
+	window.on_contrast_slider([ = ](float value) {
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::v0) ].set_voltage(value * 5.0);
+	});
+	window.on_brightness_slider([ = ](float value) {
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::anode) ].set_voltage(value * 5.0);
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::catode) ].set_voltage(0.0f);
+	});
 	panel->set_controller(controller);
 
 	// panel.set_char_at(0, 0, 'a');

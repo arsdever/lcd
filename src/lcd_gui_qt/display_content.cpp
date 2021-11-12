@@ -14,13 +14,28 @@ namespace lcd
 		QSize margins { 10, 10 };
 	}
 
-	display_content_widget::display_content_widget() { setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); }
+	display_content_widget::display_content_widget() : m_brightness { 1.0 }, m_contrast { 1.0 }
+	{
+		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	}
 
 	void display_content_widget::set_settings(display_settings const& settings)
 	{
 		m_settings = settings;
 
 		setFixedSize(calculateMinimumSize());
+		update();
+	}
+
+	void display_content_widget::on_brightness_changed(float intencity)
+	{
+		m_brightness = intencity;
+		update();
+	}
+
+	void display_content_widget::on_contrast_changed(float intencity)
+	{
+		m_contrast = intencity;
 		update();
 	}
 
@@ -41,8 +56,19 @@ namespace lcd
 	void display_content_widget::paintEvent(QPaintEvent* e)
 	{
 		QPainter painter(this);
+
+		auto mix_colors = [](QColor const& c1, QColor const& c2, float r) -> QColor {
+			return QColor(c1.red() * (1.0 - r) + c2.red() * r,
+						  c1.green() * (1.0 - r) + c2.green() * r,
+						  c1.blue() * (1.0 - r) + c2.blue() * r,
+						  255);
+		};
+
 		painter.setRenderHint(QPainter::Antialiasing);
-		painter.fillRect(e->rect(), g_pcb_graphics_settings.display_light_color);
+		painter.fillRect(e->rect(),
+						 mix_colors(g_pcb_graphics_settings.display_dark_color,
+									g_pcb_graphics_settings.display_light_color,
+									m_brightness));
 		painter.translate(margins.width(), margins.height());
 		float chw =
 			(m_settings.pixel_size + m_settings.pixel_spacing) * (m_settings.char_width - 1) + m_settings.pixel_size;
@@ -64,13 +90,16 @@ namespace lcd
 
 								for (int i = m_settings.char_width - 1; i >= 0; --i)
 									{
-										painter.fillRect(0,
-														 0,
-														 m_settings.pixel_size,
-														 m_settings.pixel_size,
-														 (chrow & (1 << i))
-															 ? g_pcb_graphics_settings.display_pixel_enabled_color
-															 : g_pcb_graphics_settings.display_pixel_color);
+										painter.fillRect(
+											0,
+											0,
+											m_settings.pixel_size,
+											m_settings.pixel_size,
+											(chrow & (1 << i))
+												? mix_colors(g_pcb_graphics_settings.display_pixel_color,
+															 g_pcb_graphics_settings.display_pixel_enabled_color,
+															 m_contrast)
+												: g_pcb_graphics_settings.display_pixel_color);
 										painter.translate(m_settings.pixel_size + m_settings.pixel_spacing, 0);
 									}
 

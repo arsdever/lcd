@@ -2,8 +2,8 @@
 
 #include "app_main_window.h"
 
-#include "qt_display.h"
 #include "pcb_graphics_settings.h"
+#include "qt_display.h"
 
 #include <cmath>
 #include <logger.h>
@@ -16,9 +16,7 @@
 
 namespace lcd
 {
-	app_main_window::app_main_window(float		  target_fps,
-									 i_timer_wptr simulation_timer,
-									 QWidget*	  parent)
+	app_main_window::app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent)
 		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps)
 	{
 		m_fps_timer = new QTimer();
@@ -50,7 +48,32 @@ namespace lcd
 		update_simulation_speed();
 		setAutoFillBackground(true);
 		setStyleSheet(tr("background-color: %1").arg(g_pcb_graphics_settings.light_color.name()));
+
+		m_brightness_slider = new QSlider();
+		m_brightness_slider->setMinimum(0);
+		m_brightness_slider->setMaximum(100);
+		m_brightness_slider->setValue(100);
+		m_brightness_slider->setOrientation(Qt::Orientation::Horizontal);
+
+		m_contrast_slider = new QSlider();
+		m_contrast_slider->setMinimum(0);
+		m_contrast_slider->setMaximum(100);
+		m_contrast_slider->setValue(100);
+		m_contrast_slider->setOrientation(Qt::Orientation::Horizontal);
+
+		connect(m_brightness_slider, &QSlider::valueChanged, this, [ = ](int value) {
+			m_brightness_slider_cb ? m_brightness_slider_cb(value / 100.0f) : void();
+		});
+		connect(m_contrast_slider, &QSlider::valueChanged, this,  [ = ](int value) {
+			m_contrast_slider_cb ? m_contrast_slider_cb(value / 100.0f) : void();
+		});
+		toolbar->addWidget(m_brightness_slider);
+		toolbar->addWidget(m_contrast_slider);
 	}
+
+	void app_main_window::on_brightness_slider(slider_change_callback_t cb) { m_brightness_slider_cb = cb; }
+
+	void app_main_window::on_contrast_slider(slider_change_callback_t cb) { m_contrast_slider_cb = cb; }
 
 	void app_main_window::update_status_bar()
 	{

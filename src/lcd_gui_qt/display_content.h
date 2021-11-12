@@ -12,6 +12,10 @@ namespace lcd
 
 		void set_settings(display_settings const& settings);
 
+		void on_brightness_changed(float intencity);
+
+		void on_contrast_changed(float intencity);
+
 	private:
 		QSize calculateMinimumSize();
 
@@ -24,5 +28,7 @@ namespace lcd
 
 	private:
 		display_settings m_settings;
+		float m_brightness;
+		float m_contrast;
 	};
 } // namespace lcd
