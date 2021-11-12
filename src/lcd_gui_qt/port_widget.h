@@ -12,6 +12,9 @@ namespace lcd
 	public:
 		port_widget(pin* pins_begin, int pin_count, QWidget* parent = nullptr);
 
+	protected:
+		virtual void paintEvent(QPaintEvent* e) override;
+
 	private:
 		std::vector<pin_widget*> m_pin_widgets;
 	};

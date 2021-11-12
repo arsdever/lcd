@@ -2,6 +2,7 @@
 
 #include "app_main_window.h"
 
+#include <pcb_graphics_settings.h>
 #include <qapplication.h>
 #include <qt_display.h>
 #include <scheduler.h>
@@ -12,6 +13,22 @@
 constexpr double  g_timing_ratio = .01f;
 lcd::scheduler	  g_scheduler;
 std::atomic<bool> g_exit_flag = false;
+
+namespace lcd
+{
+	pcb_graphics_settings g_pcb_graphics_settings { QColor(24, 79, 58),
+													QColor(34, 143, 85),
+													QColor(201, 174, 36),
+													QColor(201, 174, 36),
+													QColor(135, 173, 51),
+													QColor(50, 68, 16),
+													QColor(125, 159, 49),
+													QColor(24, 31, 9),
+													5,
+													2.5,
+													4,
+													2 };
+}
 
 int main(int argc, char** argv)
 {

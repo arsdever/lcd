@@ -78,11 +78,9 @@ namespace lcd
 			m_on_controller_changed();
 	}
 
-#pragma region i_character_data
+#pragma region i_symbol_getter
 
-	char display::get_char_at(size_t row, size_t column) const { return symbol_at(row, column); }
-
-	std::array<char, 8> display::get_symbol_at(size_t row, size_t column) const
+	std::array<char, 8> display::get_symbol_ddram(size_t row, size_t column) const
 	{
 		CHECK_CONTROLLER(return {});
 
@@ -99,8 +97,7 @@ namespace lcd
 				void*				source;
 				std::array<char, 8> result;
 
-				symb < 8 ? source = ctrl->m_cgram.data() + 8 * symb
-						 : source = ctrl->m_cgrom.data() + 8 * (symb - 8);
+				symb < 8 ? source = ctrl->m_cgram.data() + 8 * symb : source = ctrl->m_cgrom.data() + 8 * (symb - 8);
 
 				std::memcpy(result.data(), source, 8);
 				if (ctrl->cursor_state() == lcd_controller::cursor_mode_enum::line &&
@@ -111,5 +108,5 @@ namespace lcd
 			}
 	}
 
-#pragma endregion i_character_data
+#pragma endregion i_symbol_getter
 } // namespace lcd

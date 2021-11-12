@@ -2,32 +2,35 @@
 
 #include "pin_widget.h"
 
+#include <pcb_graphics_settings.h>
 #include <port.h>
+#include <qlabel>
 #include <qpainter>
 #include <qpaintevent>
 
 namespace lcd
 {
-	namespace
-	{
-		static constexpr qreal PIN_RADIUS = 10;
-		static constexpr qreal PIN_WEIGHT = 2;
-	} // namespace
-
 	pin_widget::pin_widget(pin* p, QWidget* parent) : QWidget(parent), m_underlying_pin(p), m_is_mouse_hover(false)
 	{
-		setFixedSize(QSize(PIN_RADIUS + PIN_WEIGHT, PIN_RADIUS + PIN_WEIGHT));
+		float hole_radius = g_pcb_graphics_settings.through_hole_radius;
+		float hole_width  = g_pcb_graphics_settings.through_hole_width;
+
+		setFixedSize(QSize((hole_radius + hole_width) * 2, (hole_radius + hole_width) * 2));
 	}
 
 	void pin_widget::paintEvent(QPaintEvent* e)
 	{
 		QPainter painter(this);
 		painter.setRenderHint(QPainter::Antialiasing);
-		qreal radius = m_is_mouse_hover ? PIN_RADIUS : PIN_RADIUS - 2;
-		painter.translate((PIN_WEIGHT + PIN_RADIUS) / 2.0f, (PIN_WEIGHT + PIN_RADIUS) / 2.0f);
-		painter.setPen(QPen(QColor(201, 174, 36), PIN_WEIGHT));
+
+		float hole_radius = g_pcb_graphics_settings.through_hole_radius;
+		float hole_width  = g_pcb_graphics_settings.through_hole_width;
+
+		qreal radius = m_is_mouse_hover ? hole_radius : hole_radius - 2;
+		painter.translate(hole_width + hole_radius, hole_width + hole_radius);
+		painter.setPen(QPen(g_pcb_graphics_settings.gold_color, hole_width));
 		painter.setBrush(digital_operation::read(*m_underlying_pin) ? Qt::green : Qt::black);
-		painter.drawEllipse(-radius / 2.0f, -radius / 2.0f, radius, radius);
+		painter.drawEllipse(-radius, -radius, radius * 2, radius * 2);
 	}
 
 	void pin_widget::enterEvent(QEvent* e)
