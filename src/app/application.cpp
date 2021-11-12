@@ -24,8 +24,8 @@ namespace lcd
 													QColor(50, 68, 16),
 													QColor(125, 159, 49),
 													QColor(24, 31, 9),
-													5,
-													2.5,
+													3,
+													2,
 													4,
 													2 };
 }
@@ -161,6 +161,7 @@ int main(int argc, char** argv)
 				g_scheduler.tick();
 			}
 	});
+	panel->show();
 	int result	= app.exec();
 	g_exit_flag = true;
 	scheduler_loop.join();

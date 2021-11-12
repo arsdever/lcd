@@ -11,7 +11,7 @@ namespace lcd
 {
 	namespace
 	{
-		QSize margins { 20, 15 };
+		QSize margins { 10, 10 };
 	}
 
 	display_content_widget::display_content_widget() { setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); }
@@ -20,7 +20,7 @@ namespace lcd
 	{
 		m_settings = settings;
 
-		setMinimumSize(calculateMinimumSize());
+		setFixedSize(calculateMinimumSize());
 		update();
 	}
 

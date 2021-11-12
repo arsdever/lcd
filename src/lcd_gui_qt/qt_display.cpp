@@ -2,11 +2,13 @@
 
 #include "qt_display.h"
 
+#include "decorations/screen_border.h"
 #include "display_content.h"
 #include "display_settings.h"
 #include "pcb_graphics_settings.h"
 #include "port_widget.h"
 
+#include <qmargins>
 #include <qpainter>
 #include <qpaintevent>
 #include <qstyle>
@@ -52,9 +54,43 @@ namespace lcd
 
 		m_display_content_widget = new display_content_widget();
 		m_display_content_widget->set_settings(settings);
-		layout()->addWidget(m_display_content_widget);
-		setStyleSheet(tr("background-color: %1").arg(g_pcb_graphics_settings.light_color.name()));
+		m_display_with_decorations = new screen_border(m_display_content_widget);
+		layout()->addWidget(m_display_with_decorations);
+		setWindowFlags(Qt::FramelessWindowHint);
 	}
+
+#pragma region QWidget
+
+	void qt_display::paintEvent(QPaintEvent* e)
+	{
+		// draw decorations
+		QPainter painter(this);
+		painter.setRenderHint(QPainter::Antialiasing);
+		painter.fillRect(e->rect(), QBrush(g_pcb_graphics_settings.light_color));
+		QWidget::paintEvent(e);
+	}
+
+	void qt_display::mousePressEvent(QMouseEvent* e)
+	{
+		setMouseTracking(true);
+		m_delta_pos = QPoint(e->localPos().x(), e->localPos().y());
+		e->accept();
+	}
+
+	void qt_display::mouseMoveEvent(QMouseEvent* e)
+	{
+		QPoint pos = e->globalPos() - m_delta_pos;
+		move(pos);
+		e->accept();
+	}
+
+	void qt_display::mouseReleaseEvent(QMouseEvent* e)
+	{
+		setMouseTracking(false);
+		e->accept();
+	}
+
+#pragma endregion
 
 #pragma region display
 

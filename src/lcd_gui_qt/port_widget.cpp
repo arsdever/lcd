@@ -11,7 +11,7 @@ namespace lcd
 {
 	namespace
 	{
-		static constexpr int PIN_SPACING = 2;
+		static constexpr int PIN_SPACING = 5;
 	} // namespace
 
 	port_widget::port_widget(pin* pins_begin, int pin_count, QWidget* parent) : QWidget(parent)
@@ -41,29 +41,29 @@ namespace lcd
 				// draw the hole clearance region
 				painter.setBrush(g_pcb_graphics_settings.dark_color);
 				painter.setPen(Qt::NoPen);
-				painter.drawEllipse(center, wdg->width() / 2.0 + 2, wdg->height() / 2.0 + 2);
-				painter.drawRect(
-					center.x() - wdg->width() / 2.0 - 1, center.y(), wdg->width() + 2, e->rect().height() - center.y());
-				painter.setBrush(Qt::NoBrush);
+				QRect pin_rect = wdg->rect().adjusted(-2, -2, 2, 2).translated(wdg->pos());
+				painter.drawEllipse(pin_rect);
 
-				float trace_expansion_amount = 10;
+				float trace_expansion_amount = 15;
 				float trace_width			 = g_pcb_graphics_settings.trace_width;
 
 				// draw the pass through hole clearance region
 				painter.setPen(Qt::NoPen);
 				painter.setBrush(g_pcb_graphics_settings.dark_color);
-				painter.drawEllipse(center + QPointF(0, trace_expansion_amount + trace_width),
-									trace_width / 2.0 + 2,
-									trace_width / 2.0 + 2);
+				painter.drawEllipse(
+					center + QPointF(0, trace_expansion_amount), trace_width / 2.0 + 3, trace_width / 2.0 + 3);
+
+				painter.setPen(QPen(g_pcb_graphics_settings.dark_color, 2));
+				painter.setBrush(g_pcb_graphics_settings.light_color);
+				QRectF trace_rect = QRectF(center, QSizeF(trace_width, trace_expansion_amount));
+				trace_rect.translate(-trace_width / 2.0, 0);
+				painter.drawRect(trace_rect);
+				painter.setBrush(Qt::NoBrush);
 
 				// draw the pass through hole
 				painter.setPen(QPen(g_pcb_graphics_settings.light_color, trace_width / 2.0));
 				painter.drawEllipse(
-					center + QPointF(0, trace_expansion_amount + trace_width), trace_width / 2.0, trace_width / 2.0);
-
-				// draw the trace
-				painter.setPen(QPen(g_pcb_graphics_settings.light_color, trace_width));
-				painter.drawLine(center, QPoint(center.x(), center.y() + trace_expansion_amount));
+					center + QPointF(0, trace_expansion_amount), trace_width / 2.0, trace_width / 2.0);
 			}
 	}
 } // namespace lcd

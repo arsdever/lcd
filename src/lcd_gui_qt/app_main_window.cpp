@@ -3,6 +3,7 @@
 #include "app_main_window.h"
 
 #include "qt_display.h"
+#include "pcb_graphics_settings.h"
 
 #include <cmath>
 #include <logger.h>
@@ -17,12 +18,9 @@ namespace lcd
 {
 	app_main_window::app_main_window(float		  target_fps,
 									 i_timer_wptr simulation_timer,
-									 qt_display*  display,
 									 QWidget*	  parent)
-		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps), m_display(display)
+		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps)
 	{
-		setCentralWidget(display);
-
 		m_fps_timer = new QTimer();
 
 		float interval_per_frame = 1000.0 / target_fps;
@@ -50,6 +48,8 @@ namespace lcd
 		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
 		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 		update_simulation_speed();
+		setAutoFillBackground(true);
+		setStyleSheet(tr("background-color: %1").arg(g_pcb_graphics_settings.light_color.name()));
 	}
 
 	void app_main_window::update_status_bar()

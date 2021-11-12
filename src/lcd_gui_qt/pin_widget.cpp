@@ -15,6 +15,7 @@ namespace lcd
 		float hole_radius = g_pcb_graphics_settings.through_hole_radius;
 		float hole_width  = g_pcb_graphics_settings.through_hole_width;
 
+		setContentsMargins(QMargins(0, 0, 0, 0));
 		setFixedSize(QSize((hole_radius + hole_width) * 2, (hole_radius + hole_width) * 2));
 	}
 
@@ -23,14 +24,17 @@ namespace lcd
 		QPainter painter(this);
 		painter.setRenderHint(QPainter::Antialiasing);
 
-		float hole_radius = g_pcb_graphics_settings.through_hole_radius;
-		float hole_width  = g_pcb_graphics_settings.through_hole_width;
+		float hole_width = g_pcb_graphics_settings.through_hole_width;
 
-		qreal radius = m_is_mouse_hover ? hole_radius : hole_radius - 2;
-		painter.translate(hole_width + hole_radius, hole_width + hole_radius);
 		painter.setPen(QPen(g_pcb_graphics_settings.gold_color, hole_width));
 		painter.setBrush(digital_operation::read(*m_underlying_pin) ? Qt::green : Qt::black);
-		painter.drawEllipse(-radius, -radius, radius * 2, radius * 2);
+		QRect canvas_rect = e->rect();
+		canvas_rect.adjust(hole_width / 2.0, hole_width / 2.0, -hole_width / 2.0, -hole_width / 2.0);
+
+		if (!m_is_mouse_hover)
+			canvas_rect.adjust(1, 1, -1, -1);
+
+		painter.drawEllipse(canvas_rect);
 	}
 
 	void pin_widget::enterEvent(QEvent* e)

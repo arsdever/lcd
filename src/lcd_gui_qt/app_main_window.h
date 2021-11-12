@@ -17,7 +17,6 @@ namespace lcd
 	public:
 		app_main_window(float		 target_fps,
 						i_timer_wptr simulation_timer,
-						qt_display*	 display,
 						QWidget*	 parent = nullptr);
 
 	private slots:
@@ -28,7 +27,6 @@ namespace lcd
 		QMetaObject::Connection m_status_bar_update_connection;
 		i_timer_wptr			m_simulation_timer;
 		QTimer*					m_fps_timer;
-		qt_display*				m_display;
 		QSlider*				m_simulation_speed_slider;
 		float					m_fps;
 	};
