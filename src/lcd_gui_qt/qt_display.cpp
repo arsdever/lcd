@@ -1,12 +1,21 @@
+#include <stdafx.h>
+
 #include "qt_display.h"
 
-#include "lcd_background_drawer.h"
-#include "lcd_content_drawer.h"
-#include "lcd_draw_properties.h"
+#include "decorations/screen_border.h"
+#include "display_content.h"
+#include "display_settings.h"
+#include "pcb_graphics_settings.h"
 #include "port_widget.h"
 
-#include <QPaintEvent>
-#include <qpainter.h>
+#include <qmargins>
+#include <qpainter>
+#include <qpaintevent>
+#include <qstyle>
+
+#define max(a, b)	   (((a) > (b)) ? (a) : (b))
+#define min(a, b)	   (((a) < (b)) ? (a) : (b))
+#define clamp(a, b, c) (min(max(a, b), c))
 
 namespace lcd
 {
@@ -27,62 +36,80 @@ namespace lcd
 
 	qt_display::qt_display(QWidget* parent) : QWidget(parent), display(16, 4)
 	{
-		m_drawers.push_back(std::move(std::make_shared<lcd_background_drawer>()));
-		m_drawers.push_back(std::move(std::make_shared<lcd_content_drawer>()));
+		QVBoxLayout* l = new QVBoxLayout();
+		setLayout(l);
 		on_controller_changed([ = ] {
 			CHECK_CONTROLLER();
-			m_port_widget =
-				new port_widget(ctrl->m_port.m_pins.data(), ctrl->m_port.m_pins.size(), this);
-			m_port_widget->move(0, 0);
+			m_port_widget = new port_widget(ctrl->m_port.m_pins.data(), ctrl->m_port.m_pins.size(), this);
+			l->insertWidget(0, m_port_widget);
+
+			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].on_voltage_changed([ = ] {
+				m_display_content_widget->on_contrast_changed(
+					ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].get_voltage() / 5.0f);
+			});
+			auto adjust_brightness = [ = ] {
+						float anode =
+							ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].get_voltage();
+						float catode =
+							ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::catode) ].get_voltage();
+
+						float diff = anode - catode;
+						m_display_content_widget->on_brightness_changed(clamp(diff / 5.0f, 0, 1));
+			};
+			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].on_voltage_changed(adjust_brightness);
 		});
+
+		display_settings settings;
+		settings.columns = m_width;
+		settings.rows	 = m_height;
+		settings.get_symbol =
+			std::bind(&qt_display::get_symbol_ddram, this, std::placeholders::_1, std::placeholders::_2);
+		settings.pixel_size	   = ce_pixel_size;
+		settings.pixel_spacing = ce_pixel_spacing;
+		settings.char_width	   = ce_char_width;
+		settings.char_height   = ce_char_height;
+		settings.char_hspacing = ce_char_hspacing;
+		settings.char_vspacing = ce_char_vspacing;
+
+		m_display_content_widget = new display_content_widget();
+		m_display_content_widget->set_settings(settings);
+		m_display_with_decorations = new screen_border(m_display_content_widget);
+		layout()->addWidget(m_display_with_decorations);
+		setWindowFlags(Qt::FramelessWindowHint);
 	}
 
 #pragma region QWidget
 
-	QSize qt_display::minimumSizeHint() const
-	{
-		QSizeF char_size = { ce_char_width * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing,
-							 ce_char_height * (ce_pixel_size + ce_pixel_spacing) - ce_pixel_spacing };
-		QSizeF result	 = QSizeF { m_width * (char_size.width() + ce_char_hspacing) - ce_char_hspacing,
-									m_height * (char_size.height() + ce_char_vspacing) - ce_char_vspacing } +
-						QSizeF { ce_padding.left() + ce_padding.right(), ce_padding.top() + ce_padding.bottom() };
-		return QSize(result.width(), result.height() + m_port_widget->height());
-	}
-
 	void qt_display::paintEvent(QPaintEvent* e)
 	{
+		// draw decorations
 		QPainter painter(this);
-		painter.setRenderHint(QPainter::RenderHint::HighQualityAntialiasing, true);
-		for (i_lcd_drawer_ptr drawer : m_drawers)
-			{
-				painter.save();
-
-				lcd_draw_properties props = {};
-				std::memset(&props, 0, sizeof(lcd_draw_properties));
-
-				props.painter	 = &painter;
-				props.lcd_width	 = e->rect().width();
-				props.lcd_height = e->rect().height();
-				props.columns	 = m_width;
-				props.rows		 = m_height;
-				props.symbol_getter =
-					std::bind(&qt_display::get_symbol_at, this, std::placeholders::_1, std::placeholders::_2);
-				props.char_data		= this;
-				props.pixel_size	= ce_pixel_size;
-				props.pixel_spacing = ce_pixel_spacing;
-				props.char_width	= ce_char_width;
-				props.char_height	= ce_char_height;
-				props.char_hspacing = ce_char_hspacing;
-				props.char_vspacing = ce_char_vspacing;
-				drawer->draw(props);
-
-				painter.restore();
-			}
-
+		painter.setRenderHint(QPainter::Antialiasing);
+		painter.fillRect(e->rect(), QBrush(g_pcb_graphics_settings.light_color));
 		QWidget::paintEvent(e);
 	}
 
-#pragma endregion QWidget
+	void qt_display::mousePressEvent(QMouseEvent* e)
+	{
+		setMouseTracking(true);
+		m_delta_pos = QPoint(e->localPos().x(), e->localPos().y());
+		e->accept();
+	}
+
+	void qt_display::mouseMoveEvent(QMouseEvent* e)
+	{
+		QPoint pos = e->globalPos() - m_delta_pos;
+		move(pos);
+		e->accept();
+	}
+
+	void qt_display::mouseReleaseEvent(QMouseEvent* e)
+	{
+		setMouseTracking(false);
+		e->accept();
+	}
+
+#pragma endregion
 
 #pragma region display
 

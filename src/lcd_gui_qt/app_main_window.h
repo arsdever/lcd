@@ -15,21 +15,27 @@ namespace lcd
 		Q_OBJECT
 
 	public:
-		app_main_window(float		 target_fps,
-						i_timer_wptr simulation_timer,
-						qt_display*	 display,
-						QWidget*	 parent = nullptr);
+		using slider_change_callback_t = std::function<void(float)>;
+
+	public:
+		app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent = nullptr);
+
+		void on_brightness_slider(slider_change_callback_t cb);
+		void on_contrast_slider(slider_change_callback_t cb);
 
 	private slots:
 		void update_status_bar();
 		void update_simulation_speed();
 
 	private:
-		QMetaObject::Connection m_status_bar_update_connection;
-		i_timer_wptr			m_simulation_timer;
-		QTimer*					m_fps_timer;
-		qt_display*				m_display;
-		QSlider*				m_simulation_speed_slider;
-		float					m_fps;
+		QMetaObject::Connection	 m_status_bar_update_connection;
+		i_timer_wptr			 m_simulation_timer;
+		QTimer*					 m_fps_timer;
+		QSlider*				 m_simulation_speed_slider;
+		QSlider*				 m_brightness_slider;
+		QSlider*				 m_contrast_slider;
+		slider_change_callback_t m_brightness_slider_cb;
+		slider_change_callback_t m_contrast_slider_cb;
+		float					 m_fps;
 	};
 } // namespace lcd

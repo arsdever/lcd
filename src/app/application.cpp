@@ -2,6 +2,7 @@
 
 #include "app_main_window.h"
 
+#include <pcb_graphics_settings.h>
 #include <qapplication.h>
 #include <qt_display.h>
 #include <scheduler.h>
@@ -13,6 +14,22 @@ constexpr double  g_timing_ratio = .01f;
 lcd::scheduler	  g_scheduler;
 std::atomic<bool> g_exit_flag = false;
 
+namespace lcd
+{
+	pcb_graphics_settings g_pcb_graphics_settings { QColor(24, 79, 58),
+													QColor(34, 143, 85),
+													QColor(201, 174, 36),
+													QColor(201, 174, 36),
+													QColor(135, 173, 51),
+													QColor(50, 68, 16),
+													QColor(200, 230, 89, 32),
+													QColor(24, 31, 9),
+													3,
+													2,
+													4,
+													2 };
+}
+
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
@@ -22,8 +39,15 @@ int main(int argc, char** argv)
 	g_scheduler.set_timer(tmr);
 
 	lcd::qt_display*		panel = new lcd::qt_display {};
-	lcd::app_main_window	window(60.0f, tmr, panel);
+	lcd::app_main_window	window(60.0f, tmr);
 	lcd::lcd_controller_ptr controller = std::move(std::make_shared<lcd::lcd_controller>());
+	window.on_contrast_slider([ = ](float value) {
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::v0) ].set_voltage(value * 5.0);
+	});
+	window.on_brightness_slider([ = ](float value) {
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::anode) ].set_voltage(value * 5.0);
+		controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::catode) ].set_voltage(0.0f);
+	});
 	panel->set_controller(controller);
 
 	// panel.set_char_at(0, 0, 'a');
@@ -144,6 +168,7 @@ int main(int argc, char** argv)
 				g_scheduler.tick();
 			}
 	});
+	panel->show();
 	int result	= app.exec();
 	g_exit_flag = true;
 	scheduler_loop.join();
