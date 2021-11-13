@@ -1,13 +1,13 @@
 #pragma once
 
-#include <i_character_data.h>
+#include <i_symbol_getter.h>
 #include <lcd_controller.h>
 
 namespace lcd
 {
 	extern std::array<std::array<char, 8>, 255> default_font;
 
-	class display : public i_character_data
+	class display : public i_symbol_getter
 	{
 	public:
 		enum class update_reason_enum
@@ -34,13 +34,12 @@ namespace lcd
 		virtual uint8_t		address_of_symbol(size_t row, size_t column) const;
 		virtual const char& symbol_at(size_t row, size_t column) const;
 
-#pragma region i_character_data
+#pragma region i_symbol_getter
 
 	public:
-		virtual char				get_char_at(size_t row, size_t column) const override;
-		virtual std::array<char, 8> get_symbol_at(size_t row, size_t column) const override;
+		virtual std::array<char, 8> get_symbol_ddram(size_t row, size_t column) const override;
 
-#pragma endregion i_character_data
+#pragma endregion i_symbol_getter
 
 	protected:
 		size_t				m_width;
