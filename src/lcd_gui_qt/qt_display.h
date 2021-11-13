@@ -1,12 +1,14 @@
 #pragma once
 
 #include <display.h>
-#include <i_lcd_drawer.h>
 #include <i_timer.h>
 #include <qwidget.h>
 
 namespace lcd
 {
+	class port_widget;
+	class display_content_widget;
+
 	class qt_display
 		: public QWidget
 		, public display
@@ -17,21 +19,26 @@ namespace lcd
 		qt_display(QWidget* parent = nullptr);
 
 #pragma region QWidget
-		virtual QSize minimumSizeHint() const override;
 
 	protected:
-		void paintEvent(QPaintEvent* e) override;
+		virtual void paintEvent(QPaintEvent* e) override;
+		virtual void mousePressEvent(QMouseEvent* e) override;
+		virtual void mouseMoveEvent(QMouseEvent* e) override;
+		virtual void mouseReleaseEvent(QMouseEvent* e) override;
 
-#pragma endregion QWidget
+#pragma endregion
 
 #pragma region display
 
+	public:
 		virtual void update(update_reason_enum reason) override;
 
 #pragma endregion display
 
 	private:
-		std::vector<i_lcd_drawer_ptr> m_drawers;
-		QWidget*					  m_port_widget;
+		display_content_widget* m_display_content_widget;
+		port_widget*			m_port_widget;
+		QWidget*				m_display_with_decorations;
+		QPoint					m_delta_pos;
 	};
 } // namespace lcd
