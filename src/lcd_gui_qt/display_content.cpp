@@ -61,7 +61,7 @@ namespace lcd
 			return QColor(c1.red() * (1.0 - r) + c2.red() * r,
 						  c1.green() * (1.0 - r) + c2.green() * r,
 						  c1.blue() * (1.0 - r) + c2.blue() * r,
-						  255);
+						  c1.alpha() * (1.0 - r) + c2.alpha() * r);
 		};
 
 		painter.setRenderHint(QPainter::Antialiasing);

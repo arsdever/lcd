@@ -22,7 +22,7 @@ namespace lcd
 													QColor(201, 174, 36),
 													QColor(135, 173, 51),
 													QColor(50, 68, 16),
-													QColor(125, 159, 49),
+													QColor(200, 230, 89, 32),
 													QColor(24, 31, 9),
 													3,
 													2,
