@@ -28,6 +28,9 @@ namespace lcd
 		connection_t register_to_event(event_types_enum et, event_t::handler_t const& cb);
 		void		 unregister_from_event(connection_t con);
 
+		std::string const& get_name() const;
+		int				   get_index() const;
+
 	private:
 		std::string			   m_name;
 		int					   m_pin_index;

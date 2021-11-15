@@ -39,5 +39,9 @@ namespace lcd
 		return m_events[ static_cast<int>(et) ] += cb;
 	}
 
+	std::string const& pin::get_name() const { return m_name; }
+
+	int pin::get_index() const { return m_pin_index; }
+
 	void pin::unregister_from_event(connection_t con) { con.disconnect(); }
 } // namespace lcd
