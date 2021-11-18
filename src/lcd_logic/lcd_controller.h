@@ -128,7 +128,7 @@ namespace lcd
 			uint8_t				 data;
 		};
 
-		inline static constexpr std::string pin_name(pinout p)
+		inline static std::string pin_name(pinout p)
 		{
 			switch (p)
 				{

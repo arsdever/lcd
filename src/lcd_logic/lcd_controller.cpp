@@ -2,6 +2,7 @@
 
 #include "lcd_controller.h"
 
+#include "data_bulk.h"
 #include "scheduler.h"
 
 #include <lcd_assert.h>
@@ -90,7 +91,7 @@ namespace lcd
 				0x00, 0x0e, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x00,
 			};
 
-			std::memcpy(dest, data, sizeof(data));
+			std::copy(data, data + sizeof(data), dest);
 		};
 	} // namespace
 
@@ -132,8 +133,8 @@ namespace lcd
 		  m_display_state { display_state_enum::off }, m_cursor_visibility { cursor_visibility_enum::not_visible },
 		  m_blink_mode { blink_mode_enum::not_blinking }, m_cursor_mode { cursor_mode_enum::none },
 		  m_move_direction { move_direction_enum::increment }, m_insert { false }, m_busy { false },
-		  m_address_mode { address_mode_enum::ddram }, m_cgram_address_counter { 0 }, m_cgram { 0 },
-		  m_ddram_address_counter { 0 }, m_ddram { 0 }
+		  m_address_mode { address_mode_enum::ddram }, m_cgram_address_counter { 0 },
+		  m_cgram { create_array<64>('\0') }, m_ddram_address_counter { 0 }, m_ddram { create_array<128>('\0') }
 	{
 		init_default_font(m_cgrom.data());
 		m_port.m_pins[ static_cast<int>(pinout::en) ].on_edge_down(
@@ -231,7 +232,7 @@ namespace lcd
 			case command_types_enum::clear:
 				{
 					instruction_impl = [ & ] {
-						std::memset(m_ddram.data(), 0x20, m_ddram.size());
+						m_ddram					= create_array<128>(' ');
 						m_ddram_address_counter = 0x00;
 						m_scroll				= 0;
 						m_move_direction		= move_direction_enum::increment;

@@ -1,12 +1,14 @@
 #pragma once
 
-#include <iostream>
+#include <algorithm>
 #include <array>
-#include <functional>
-#include <memory>
-#include <string>
 #include <cassert>
 #include <chrono>
-#include <unordered_map>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <memory>
+#include <string>
 #include <thread>
 #include <tuple>
+#include <unordered_map>

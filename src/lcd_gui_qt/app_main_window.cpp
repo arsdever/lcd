@@ -42,7 +42,7 @@ namespace lcd
 		toolbar->addWidget(m_simulation_speed_slider);
 		m_simulation_speed_slider->setMinimum(-12);
 		m_simulation_speed_slider->setMaximum(0);
-		m_simulation_speed_slider->setValue(-6);
+		m_simulation_speed_slider->setValue(-2);
 		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
 		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 		update_simulation_speed();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 namespace lcd
 {
 	// https://stackoverflow.com/a/16606128/10185183

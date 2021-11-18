@@ -17,7 +17,7 @@ namespace lcd
 
 	void display::update(update_reason_enum reason) { }
 
-	const char& display::symbol_at(size_t row, size_t column) const
+	char display::symbol_at(size_t row, size_t column) const
 	{
 		CHECK_CONTROLLER(return 0);
 
@@ -94,12 +94,12 @@ namespace lcd
 		else
 			{
 				char				symb = symbol_at(row, column);
-				void*				source;
+				char*				source;
 				std::array<char, 8> result;
 
 				symb < 8 ? source = ctrl->m_cgram.data() + 8 * symb : source = ctrl->m_cgrom.data() + 8 * (symb - 8);
 
-				std::memcpy(result.data(), source, 8);
+				std::copy(source, source + 8, result.data());
 				if (ctrl->cursor_state() == lcd_controller::cursor_mode_enum::line &&
 					address_of_symbol(row, column) == ctrl->cursor_position())
 					result.data()[ 7 ] = char(0xff);
