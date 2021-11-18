@@ -43,20 +43,20 @@ namespace lcd
 			m_port_widget = new port_widget(ctrl->m_port.m_pins.data(), ctrl->m_port.m_pins.size(), this);
 			l->insertWidget(0, m_port_widget);
 
-			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].on_voltage_changed([ = ] {
-				m_display_content_widget->on_contrast_changed(
-					ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].get_voltage() / 5.0f);
-			});
+			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].register_to_event(
+				pin::event_types_enum::on_voltage_changed, [ = ] {
+					m_display_content_widget->on_contrast_changed(
+						ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::v0) ].get_voltage() / 5.0f);
+				});
 			auto adjust_brightness = [ = ] {
-						float anode =
-							ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].get_voltage();
-						float catode =
-							ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::catode) ].get_voltage();
+				float anode	 = ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].get_voltage();
+				float catode = ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::catode) ].get_voltage();
 
-						float diff = anode - catode;
-						m_display_content_widget->on_brightness_changed(clamp(diff / 5.0f, 0, 1));
+				float diff = anode - catode;
+				m_display_content_widget->on_brightness_changed(clamp(diff / 5.0f, 0, 1));
 			};
-			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].on_voltage_changed(adjust_brightness);
+			ctrl->m_port.m_pins[ static_cast<int>(lcd_controller::pinout::anode) ].register_to_event(
+				pin::event_types_enum::on_voltage_changed, adjust_brightness);
 		});
 
 		display_settings settings;
