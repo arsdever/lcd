@@ -32,7 +32,7 @@ namespace lcd
 
 	protected:
 		virtual uint8_t		address_of_symbol(size_t row, size_t column) const;
-		virtual const char& symbol_at(size_t row, size_t column) const;
+		virtual char symbol_at(size_t row, size_t column) const;
 
 #pragma region i_symbol_getter
 
