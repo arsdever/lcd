@@ -1,6 +1,7 @@
 #include <stdafx.h>
 
 #include "pin_widget.h"
+#include "pin_tooltip.h"
 
 #include <pcb_graphics_settings.h>
 #include <port.h>
@@ -14,6 +15,8 @@ namespace lcd
 	{
 		float hole_radius = g_pcb_graphics_settings.through_hole_radius;
 		float hole_width  = g_pcb_graphics_settings.through_hole_width;
+
+		m_tooltip = new pin_tooltip(p);
 
 		setContentsMargins(QMargins(0, 0, 0, 0));
 		setFixedSize(QSize((hole_radius + hole_width) * 2, (hole_radius + hole_width) * 2));
@@ -40,12 +43,15 @@ namespace lcd
 	void pin_widget::enterEvent(QEvent* e)
 	{
 		m_is_mouse_hover = true;
+		m_tooltip->show();
+		m_tooltip->move(QCursor::pos() + QPoint(- m_tooltip->width() / 2.0, 5));
 		update();
 	}
 
 	void pin_widget::leaveEvent(QEvent* e)
 	{
 		m_is_mouse_hover = false;
+		m_tooltip->hide();
 		update();
 	}
 } // namespace lcd

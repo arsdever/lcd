@@ -5,6 +5,7 @@
 namespace lcd
 {
 	class pin;
+	class pin_tooltip;
 
 	class pin_widget : public QWidget
 	{
@@ -21,5 +22,6 @@ namespace lcd
 	private:
 		pin* m_underlying_pin;
 		bool m_is_mouse_hover;
+		pin_tooltip* m_tooltip;
 	};
 } // namespace lcd
