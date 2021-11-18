@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QWidget>
 #include <display_settings.h>
 
 namespace lcd

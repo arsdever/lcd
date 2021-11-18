@@ -2,7 +2,7 @@
 
 #include <lcd_logic_prototypes.h>
 
-#include <qmainwindow>
+#include <QMainWindow>
 
 class QTimer;
 class QSlider;
@@ -31,10 +31,10 @@ namespace lcd
 	private:
 		QMetaObject::Connection	 m_status_bar_update_connection;
 		timer_wptr				 m_simulation_timer;
-		QTimer*					 m_fps_timer;
-		QSlider*				 m_simulation_speed_slider;
-		QSlider*				 m_brightness_slider;
-		QSlider*				 m_contrast_slider;
+		QTimer* m_fps_timer;
+		QSlider* m_simulation_speed_slider;
+		QSlider* m_brightness_slider;
+		QSlider* m_contrast_slider;
 		slider_change_callback_t m_brightness_slider_cb;
 		slider_change_callback_t m_contrast_slider_cb;
 		float					 m_fps;
