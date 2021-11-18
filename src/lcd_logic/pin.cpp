@@ -16,10 +16,8 @@ namespace lcd
 			{
 				if (voltage > 4.7f)
 					{
-						if (m_event_handlers[ 2 ])
-							m_event_handlers[ 2 ]();
-						if (m_event_handlers[ 3 ])
-							m_event_handlers[ 3 ]();
+						m_events[ static_cast<int>(event_types_enum::on_edge_up) ].invoke();
+						m_events[ static_cast<int>(event_types_enum::on_edge_switch) ].invoke();
 					}
 			}
 
@@ -27,23 +25,19 @@ namespace lcd
 			{
 				if (voltage < 0.2f)
 					{
-						if (m_event_handlers[ 1 ])
-							m_event_handlers[ 1 ]();
-						if (m_event_handlers[ 3 ])
-							m_event_handlers[ 3 ]();
+						m_events[ static_cast<int>(event_types_enum::on_edge_down) ].invoke();
+						m_events[ static_cast<int>(event_types_enum::on_edge_switch) ].invoke();
 					}
 			}
 
 		m_voltage = voltage;
-		if (m_event_handlers[ 0 ])
-			m_event_handlers[ 0 ]();
+		m_events[ static_cast<int>(event_types_enum::on_voltage_changed) ].invoke();
 	}
 
-	void pin::on_voltage_changed(event_handler_t const& cb) { m_event_handlers[ 0 ] = cb; }
+	pin::connection_t pin::register_to_event(event_types_enum et, event_t::handler_t const& cb)
+	{
+		return m_events[ static_cast<int>(et) ] += cb;
+	}
 
-	void pin::on_edge_down(event_handler_t const& cb) { m_event_handlers[ 1 ] = cb; }
-
-	void pin::on_edge_up(event_handler_t const& cb) { m_event_handlers[ 2 ] = cb; }
-
-	void pin::on_edge_switch(event_handler_t const& cb) { m_event_handlers[ 3 ] = cb; }
+	void pin::unregister_from_event(connection_t con) { con.disconnect(); }
 } // namespace lcd
