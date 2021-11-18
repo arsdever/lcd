@@ -19,7 +19,7 @@ namespace lcd
 			{
 				// https://spdlog.docsforge.com/v1.x/2.creating-loggers/#creating-loggers-with-multiple-sinks
 				std::vector<spdlog::sink_ptr> sinks;
-				sinks.push_back(std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>());
+				sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 				sinks.push_back(
 					std::make_shared<spdlog::sinks::daily_file_sink_mt>("lcd_controller.log", 23, 59, true, 5));
 				g_logger = std::make_shared<spdlog::logger>("global", begin(sinks), end(sinks));
