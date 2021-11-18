@@ -137,8 +137,8 @@ namespace lcd
 		  m_cgram { create_array<64>('\0') }, m_ddram_address_counter { 0 }, m_ddram { create_array<128>('\0') }
 	{
 		init_default_font(m_cgrom.data());
-		m_port.m_pins[ static_cast<int>(pinout::en) ].on_edge_down(
-			std::bind(&lcd_controller::on_enable_falling_edge, this));
+		m_port.m_pins[ static_cast<int>(pinout::en) ].register_to_event(
+			pin::event_types_enum::on_edge_down, std::bind(&lcd_controller::on_enable_falling_edge, this));
 	}
 
 	void lcd_controller::register_for_updates(on_update_delegate callback) { m_on_update_cb = callback; }
@@ -150,7 +150,7 @@ namespace lcd
 
 		for (pin& p : m_port.m_pins)
 			{
-				p.on_voltage_changed(callback);
+				p.register_to_event(pin::event_types_enum::on_voltage_changed, callback);
 			}
 	}
 
