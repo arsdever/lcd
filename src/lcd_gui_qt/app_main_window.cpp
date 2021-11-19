@@ -37,9 +37,13 @@ namespace lcd
 
 		m_simulation_speed_slider = new QSlider();
 		QToolBar* toolbar		  = new QToolBar();
+		QToolBar* timer_toolbar	  = new QToolBar();
+
+		addToolBar(timer_toolbar);
 		addToolBar(toolbar);
 
-		toolbar->addWidget(m_simulation_speed_slider);
+		timer_toolbar->addWidget(m_simulation_speed_slider);
+
 		m_simulation_speed_slider->setMinimum(-12);
 		m_simulation_speed_slider->setMaximum(0);
 		m_simulation_speed_slider->setValue(-2);
@@ -64,9 +68,11 @@ namespace lcd
 		connect(m_brightness_slider, &QSlider::valueChanged, this, [ = ](int value) {
 			m_brightness_slider_cb ? m_brightness_slider_cb(value / 100.0f) : void();
 		});
-		connect(m_contrast_slider, &QSlider::valueChanged, this,  [ = ](int value) {
+		connect(m_contrast_slider, &QSlider::valueChanged, this, [ = ](int value) {
 			m_contrast_slider_cb ? m_contrast_slider_cb(value / 100.0f) : void();
 		});
+
+		toolbar->setOrientation(Qt::Vertical);
 		toolbar->addWidget(m_brightness_slider);
 		toolbar->addWidget(m_contrast_slider);
 	}
