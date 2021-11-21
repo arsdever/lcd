@@ -1,5 +1,7 @@
 ﻿# LCD simulator
 
+![Build](https://github.com/arsdever/lcd/actions/workflows/build.yml/badge.svg)
+
 This repository contains the source code of the LCD simulator, which, at some
 point, will become a plugin project for the microcontroller simulator. It
 is written in `C++` and by the end should come as a separate library package
