@@ -6,7 +6,7 @@
 #include <pcb_graphics_settings.h>
 #include <qapplication.h>
 #include <qt_display.h>
-#include <std_timer.h>
+#include <step_timer.h>
 
 // smaller value will decrease the speed of the simulation
 // 1s = 100us
@@ -30,7 +30,7 @@ pcb_graphics_settings g_pcb_graphics_settings{QColor(24, 79, 58),
 int main(int argc, char** argv) {
   QApplication app(argc, argv);
 
-  lcd::i_timer_ptr tmr = std::make_shared<lcd::std_timer>();
+  lcd::i_timer_ptr tmr = std::make_shared<lcd::step_timer>();
 
   lcd::qt_display* panel = new lcd::qt_display{};
   lcd::log_widget log_wdg;

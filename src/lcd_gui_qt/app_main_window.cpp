@@ -21,7 +21,7 @@ lcd::scheduler g_scheduler;
 namespace lcd
 {
 	app_main_window::app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent)
-		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps), m_stop_flag(false)
+		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps)
 	{
 		g_scheduler.set_timer(m_simulation_timer);
 		m_fps_timer = new QTimer();
@@ -46,7 +46,7 @@ namespace lcd
 		QToolButton* play_button   = new QToolButton();
 		QToolButton* step_button   = new QToolButton();
 		QToolButton* stop_button   = new QToolButton();
-		play_button->setText(">");
+		play_button->setText("||");
 		step_button->setText(">|");
 		stop_button->setText("X");
 
@@ -58,9 +58,9 @@ namespace lcd
 		timer_toolbar->addWidget(stop_button);
 		timer_toolbar->addWidget(m_simulation_speed_slider);
 
-		m_simulation_speed_slider->setMinimum(-12);
+		m_simulation_speed_slider->setMinimum(-20);
 		m_simulation_speed_slider->setMaximum(0);
-		m_simulation_speed_slider->setValue(-2);
+		m_simulation_speed_slider->setValue(-9);
 		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
 		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 		update_simulation_speed();
@@ -90,23 +90,20 @@ namespace lcd
 		toolbar->addWidget(m_brightness_slider);
 		toolbar->addWidget(m_contrast_slider);
 
-		std::chrono::time_point last_tick = std::chrono::system_clock::now();
-		m_scheduler_thread				  = std::thread { [ this ] {
-			g_scheduler.start();
-			while (!m_stop_flag)
+		connect(play_button, &QToolButton::clicked, this, [ play_button ] {
+			if (g_scheduler.get_state() == scheduler::state::running)
 				{
-					std::lock_guard<std::mutex> guard(m_simulation_blocker);
-					g_scheduler.tick();
+					g_scheduler.pause();
+					play_button->setText(">");
 				}
-		} };
-
-		connect(play_button, &QToolButton::clicked, this, &app_main_window::play_pause);
-	}
-
-	app_main_window::~app_main_window()
-	{
-		m_stop_flag = true;
-		m_scheduler_thread.join();
+			else
+				{
+					g_scheduler.run();
+					play_button->setText("||");
+				}
+		});
+		connect(step_button, &QToolButton::clicked, this, [] { g_scheduler.tick(); });
+		g_scheduler.start();
 	}
 
 	void app_main_window::on_brightness_slider(slider_change_callback_t cb) { m_brightness_slider_cb = cb; }
@@ -140,6 +137,4 @@ namespace lcd
 				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
 			}
 	}
-
-	void app_main_window::play_pause() { m_simulation_blocker.lock(); }
 } // namespace lcd
