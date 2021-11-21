@@ -13,13 +13,17 @@
 #include <qtimer>
 #include <qtoolbar>
 #include <qtoolbutton>
+#include <scheduler.h>
 #include <timer_helper_functions.h>
+
+lcd::scheduler g_scheduler;
 
 namespace lcd
 {
 	app_main_window::app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent)
-		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps)
+		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps), m_stop_flag(false)
 	{
+		g_scheduler.set_timer(m_simulation_timer);
 		m_fps_timer = new QTimer();
 
 		float interval_per_frame = 1000.0 / target_fps;
@@ -85,6 +89,21 @@ namespace lcd
 		toolbar->setOrientation(Qt::Vertical);
 		toolbar->addWidget(m_brightness_slider);
 		toolbar->addWidget(m_contrast_slider);
+
+		std::chrono::time_point last_tick = std::chrono::system_clock::now();
+		m_scheduler_thread				  = std::thread { [ this ] {
+			g_scheduler.start();
+			while (!m_stop_flag)
+				{
+					g_scheduler.tick();
+				}
+		} };
+	}
+
+	app_main_window::~app_main_window()
+	{
+		m_stop_flag = true;
+		m_scheduler_thread.join();
 	}
 
 	void app_main_window::on_brightness_slider(slider_change_callback_t cb) { m_brightness_slider_cb = cb; }

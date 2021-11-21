@@ -19,6 +19,7 @@ namespace lcd
 
 	public:
 		app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent = nullptr);
+		virtual ~app_main_window() override;
 
 		void on_brightness_slider(slider_change_callback_t cb);
 		void on_contrast_slider(slider_change_callback_t cb);
@@ -37,5 +38,7 @@ namespace lcd
 		slider_change_callback_t m_brightness_slider_cb;
 		slider_change_callback_t m_contrast_slider_cb;
 		float					 m_fps;
+		std::thread				 m_scheduler_thread;
+		bool					 m_stop_flag;
 	};
 } // namespace lcd
