@@ -12,6 +12,7 @@
 #include <qstatusbar>
 #include <qtimer>
 #include <qtoolbar>
+#include <qtoolbutton>
 #include <timer_helper_functions.h>
 
 namespace lcd
@@ -35,13 +36,22 @@ namespace lcd
 
 		m_fps_timer->start();
 
-		m_simulation_speed_slider = new QSlider();
-		QToolBar* toolbar		  = new QToolBar();
-		QToolBar* timer_toolbar	  = new QToolBar();
+		m_simulation_speed_slider  = new QSlider();
+		QToolBar*	 toolbar	   = new QToolBar();
+		QToolBar*	 timer_toolbar = new QToolBar();
+		QToolButton* play_button   = new QToolButton();
+		QToolButton* step_button   = new QToolButton();
+		QToolButton* stop_button   = new QToolButton();
+		play_button->setText(">");
+		step_button->setText(">|");
+		stop_button->setText("X");
 
 		addToolBar(timer_toolbar);
 		addToolBar(toolbar);
 
+		timer_toolbar->addWidget(play_button);
+		timer_toolbar->addWidget(step_button);
+		timer_toolbar->addWidget(stop_button);
 		timer_toolbar->addWidget(m_simulation_speed_slider);
 
 		m_simulation_speed_slider->setMinimum(-12);
