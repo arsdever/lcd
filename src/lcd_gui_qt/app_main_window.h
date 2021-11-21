@@ -1,6 +1,7 @@
 #pragma once
 
 #include <i_timer.h>
+#include <mutex>
 #include <qmainwindow>
 
 class QTimer;
@@ -27,6 +28,7 @@ namespace lcd
 	private slots:
 		void update_status_bar();
 		void update_simulation_speed();
+		void play_pause();
 
 	private:
 		QMetaObject::Connection	 m_status_bar_update_connection;
@@ -40,5 +42,6 @@ namespace lcd
 		float					 m_fps;
 		std::thread				 m_scheduler_thread;
 		bool					 m_stop_flag;
+		std::mutex				 m_simulation_blocker;
 	};
 } // namespace lcd

@@ -95,9 +95,12 @@ namespace lcd
 			g_scheduler.start();
 			while (!m_stop_flag)
 				{
+					std::lock_guard<std::mutex> guard(m_simulation_blocker);
 					g_scheduler.tick();
 				}
 		} };
+
+		connect(play_button, &QToolButton::clicked, this, &app_main_window::play_pause);
 	}
 
 	app_main_window::~app_main_window()
@@ -137,4 +140,6 @@ namespace lcd
 				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
 			}
 	}
+
+	void app_main_window::play_pause() { m_simulation_blocker.lock(); }
 } // namespace lcd
