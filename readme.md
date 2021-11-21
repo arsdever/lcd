@@ -17,6 +17,9 @@ If you want to support the development of the project, please take a look into
 the [📚 Developer's guide](docs/developer.md) for preparation of the
 development environment.
 
+[![Open in web editor](https://img.shields.io/static/v1?message=Open%20in%20web%20editor&logo=visualstudiocode&labelColor=323232&color=0078d7&logoColor=0078d7&label=%20)](https://github.dev/arsdever/lcd/)
+[![Open in Visual Studio Code](https://img.shields.io/static/v1?message=Open%20in%20Visual%20Studio%20Code&logo=visualstudiocode&labelColor=323232&color=0078d7&logoColor=0078d7&label=%20)](https://open.vscode.dev/arsdever/lcd/)
+
 #### Issue report
 If you have some ideas or found some issues in the implementation, please feel
 free to open an issue.
