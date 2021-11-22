@@ -46,9 +46,10 @@ namespace lcd
 		QToolButton* play_button   = new QToolButton();
 		QToolButton* step_button   = new QToolButton();
 		QToolButton* stop_button   = new QToolButton();
-		play_button->setText("||");
-		step_button->setText(">|");
-		stop_button->setText("X");
+
+		play_button->setIcon(QIcon(":/res/icons/16/pause.png"));
+		step_button->setIcon(QIcon(":/res/icons/16/step.png"));
+		stop_button->setIcon(QIcon(":/res/icons/16/stop.png"));
 
 		addToolBar(timer_toolbar);
 		addToolBar(toolbar);
@@ -94,12 +95,12 @@ namespace lcd
 			if (g_scheduler.get_state() == scheduler::state::running)
 				{
 					g_scheduler.pause();
-					play_button->setText(">");
+					play_button->setIcon(QIcon(":/res/icons/16/play.png"));
 				}
 			else
 				{
 					g_scheduler.run();
-					play_button->setText("||");
+					play_button->setIcon(QIcon(":/res/icons/16/pause.png"));
 				}
 		});
 		connect(step_button, &QToolButton::clicked, this, [] { g_scheduler.tick(); });
