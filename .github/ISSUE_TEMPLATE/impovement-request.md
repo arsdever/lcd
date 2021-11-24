@@ -1,6 +1,6 @@
 ---
 name: Impovement request
-about: Briefly describe what improvement you want to request.
+about: Request an improvement for already existing things.
 title: "[imp]"
 labels: enhancement
 assignees: ''
