@@ -9,4 +9,6 @@
 namespace lcd
 {
 	POINTERIZE(logger)
+	POINTERIZE(log_history)
+	POINTERIZE(log_history_sink)
 } // namespace lcd
