@@ -10,11 +10,6 @@ else ()
 	add_subdirectory (lcd_gui_qt)
 endif ()
 
-if (NOT ${spdlog_FOUND})
-	message ("spdlog not found. Falling back to std logging")
-	add_compile_definitions(NO_SPDLOG)
-endif()
-
 add_subdirectory (logging)
 add_subdirectory (lcd_logic)
 
