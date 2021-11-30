@@ -4,6 +4,8 @@
 
 namespace lcd
 {
+	spdlog_history_sink::spdlog_history_sink() = default;
+
 	spdlog_history_sink::spdlog_history_sink(log_history_wptr history) : log_history_sink(history) { }
 
 	void spdlog_history_sink::sink_it_(const spdlog::details::log_msg& msg)

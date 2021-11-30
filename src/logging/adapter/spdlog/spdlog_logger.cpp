@@ -2,6 +2,7 @@
 
 #include "logger.h"
 #include "spdlog_helper.h"
+#include "spdlog_history_sink.h"
 
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -12,7 +13,7 @@
 
 namespace lcd
 {
-	static std::shared_ptr<spdlog::logger> g_logger;
+	std::shared_ptr<spdlog::logger> g_logger;
 
 	struct init_spdlog
 	{

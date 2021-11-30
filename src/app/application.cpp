@@ -7,6 +7,7 @@
 #include <qt_display.h>
 #include <scheduler.h>
 #include <std_timer.h>
+#include <logging/log_widget.h>
 
 // smaller value will decrease the speed of the simulation
 // 1s = 100us
@@ -39,6 +40,7 @@ int main(int argc, char** argv)
 	g_scheduler.set_timer(tmr);
 
 	lcd::qt_display*		panel = new lcd::qt_display {};
+	lcd::log_widget			log_wdg;
 	lcd::app_main_window	window(60.0f, tmr);
 	lcd::lcd_controller_ptr controller = std::move(std::make_shared<lcd::lcd_controller>());
 	window.on_contrast_slider([ = ](float value) {
@@ -169,6 +171,7 @@ int main(int argc, char** argv)
 			}
 	});
 	panel->show();
+	log_wdg.show();
 	int result	= app.exec();
 	g_exit_flag = true;
 	scheduler_loop.join();

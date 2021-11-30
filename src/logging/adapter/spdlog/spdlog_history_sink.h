@@ -14,6 +14,7 @@ namespace lcd
 		, public spdlog::sinks::base_sink<std::mutex>
 	{
 	public:
+		spdlog_history_sink();
 		spdlog_history_sink(log_history_wptr history);
 
 		void sink_it_(const spdlog::details::log_msg& msg) override;
