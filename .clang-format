@@ -73,6 +73,9 @@ IncludeCategories:
   - Regex:           'stdafx\.h'
     Priority:        -100
     SortPriority:    -100
+  - Regex:           'prototypes\.h'
+    Priority:        -99
+    SortPriority:    -99
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        2
     SortPriority:    2
