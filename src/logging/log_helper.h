@@ -13,6 +13,7 @@ namespace lcd
 			case logger::log_level::error: return "error";
 			case logger::log_level::info: return "info";
 			case logger::log_level::warn: return "warning";
+			default: return "unknown";
 			}
 	}
 } // namespace lcd

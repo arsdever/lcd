@@ -1,5 +1,6 @@
 #include <stdafx.h>
 
+#include "i_log_sink.h"
 #include "logger.h"
 #include "spdlog_helper.h"
 #include "spdlog_history_sink.h"
@@ -35,4 +36,11 @@ namespace lcd
 	void logger::error(std::string const& message) { LOG_METHOD(error, message); }
 	void logger::critical(std::string const& message) { LOG_METHOD(critical, message); }
 	void logger::debug(std::string const& message) { LOG_METHOD(debug, message); }
+
+	void logger::add_sink(log_sink_ptr sink)
+	{
+		std::shared_ptr<spdlog_history_sink> s = std::dynamic_pointer_cast<spdlog_history_sink>(sink);
+		if (s)
+			g_logger->sinks().push_back(s);
+	}
 } // namespace lcd

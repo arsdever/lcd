@@ -7,6 +7,8 @@ namespace lcd
 {
 	log_history_sink_ptr log_history_sink_factory::create(log_history_wptr history)
 	{
-		return std::make_shared<spdlog_history_sink>(history);
+		std::shared_ptr<spdlog_history_sink> sink = std::make_shared<spdlog_history_sink>();
+		sink->set_history(history);
+		return sink;
 	}
 } // namespace lcd

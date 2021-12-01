@@ -4,21 +4,18 @@
 
 #include "log_history_model.h"
 
-#include <adapter/spdlog/spdlog_history_sink.h>
+#include <factory/log_history_sink_factory.h>
+#include <log_history_sink.h>
 #include <i_log_history.h>
 #include <log_helper.h>
 #include <logging/log_history.h>
-#include <spdlog/spdlog.h>
 
 namespace lcd
 {
-	extern std::shared_ptr<spdlog::logger> g_logger;
-
 	log_history_model::log_history_model() : m_log_history(std::make_shared<log_history>())
 	{
-		std::shared_ptr<spdlog_history_sink> sink = std::make_shared<spdlog_history_sink>();
-		g_logger->sinks().push_back(sink);
-		sink->set_history(m_log_history);
+		std::shared_ptr<log_history_sink> sink = log_history_sink_factory::create(m_log_history);
+		logger::add_sink(sink);
 		std::shared_ptr<log_history> history = std::static_pointer_cast<log_history>(m_log_history);
 		history->on_updated(
 			[ this, history ] { beginInsertRows({}, rowCount() - 1, rowCount() - 1), endInsertRows(); });

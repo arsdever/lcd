@@ -1,5 +1,9 @@
 #include <stdafx.h>
 
+#include <logging_prototypes.h>
+
+#include "i_log_sink.h"
+
 #include <iostream>
 #include <logger.h>
 
@@ -14,4 +18,9 @@ namespace lcd
 	void logger::error(std::string const& message) { LOG_METHOD(error, message); }
 	void logger::critical(std::string const& message) { LOG_METHOD(critical, message); }
 	void logger::debug(std::string const& message) { LOG_METHOD(debug, message); }
+
+	void logger::add_sink(log_sink_ptr sink)
+	{
+		// TODO: implement
+	}
 } // namespace lcd

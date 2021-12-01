@@ -1,7 +1,7 @@
 #pragma once
 
 #define POINTERIZE_I(classname)                                                                                        \
-	class i_##classname;                                                                                                 \
+	class i_##classname;                                                                                               \
 	using classname##_ptr  = std::shared_ptr<i_##classname>;                                                           \
 	using classname##_wptr = std::weak_ptr<i_##classname>;                                                             \
 	using classname##_uptr = std::unique_ptr<i_##classname>;
@@ -18,4 +18,5 @@ namespace lcd
 	POINTERIZE(log_history_sink)
 
 	POINTERIZE_I(log_history)
+	POINTERIZE_I(log_sink)
 } // namespace lcd
