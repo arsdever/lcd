@@ -1,5 +1,7 @@
 #pragma once
 
+#include <logging_prototypes.h>
+
 namespace lcd
 {
 	class logger
@@ -21,5 +23,7 @@ namespace lcd
 		static void error(std::string const& message);
 		static void critical(std::string const& message);
 		static void debug(std::string const& message);
+
+		static void add_sink(log_sink_ptr sink);
 	};
 } // namespace lcd
