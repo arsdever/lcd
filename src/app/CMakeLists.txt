@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 # Add source to this project's executable.
-add_executable (app "application.cpp")
+add_executable (app "application.cpp" "res.qrc")
 
 target_include_directories (app PUBLIC
 ${CMAKE_SOURCE_DIR}/src/lcd_logic
