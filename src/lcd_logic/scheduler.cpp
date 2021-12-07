@@ -10,6 +10,8 @@ namespace lcd
 
 	void scheduler::set_timer(i_timer_wptr timer) { m_timer = timer; }
 
+	i_timer_wptr scheduler::timer() const { return m_timer; }
+
 	void scheduler::add_task(task_t task, duration_t delay)
 	{
 		m_tasks.push_back({ task, delay, m_task_id_counter++, std::chrono::system_clock::now() });

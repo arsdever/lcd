@@ -22,14 +22,15 @@ namespace lcd
 		scheduler();
 		scheduler(i_timer_wptr timer);
 
-		void set_timer(i_timer_wptr timer);
-		void add_task(task_t task, duration_t delay);
-		void start();
-		void run();
-		void pause();
-		void stop();
-		void tick();
-		state get_state() const;
+		void		 set_timer(i_timer_wptr timer);
+		i_timer_wptr timer() const;
+		void		 add_task(task_t task, duration_t delay);
+		void		 start();
+		void		 run();
+		void		 pause();
+		void		 stop();
+		void		 tick();
+		state		 get_state() const;
 
 	private:
 		size_t		 m_task_id_counter;
