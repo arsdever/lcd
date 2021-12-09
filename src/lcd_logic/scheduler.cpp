@@ -12,9 +12,26 @@ namespace lcd
 
 	i_timer_wptr scheduler::timer() const { return m_timer; }
 
-	void scheduler::add_task(task_t task, duration_t delay)
+	scheduler::task_id_t scheduler::add_task(task_t task, duration_t delay, bool sequental, task_id_t after)
 	{
+		if (sequental)
+			{
+				schedule_t::iterator task_with_id;
+				for (auto it = m_tasks.begin(); it != m_tasks.end(); ++it)
+					{
+						if (std::get<2>(*it) == after)
+							{
+								task_with_id = it;
+								break;
+							}
+
+						task_with_id = it;
+					}
+
+				delay += std::get<1>(*task_with_id);
+			}
 		m_tasks.push_back({ task, delay, m_task_id_counter++, std::chrono::system_clock::now() });
+		return m_task_id_counter;
 	}
 
 	void scheduler::start()

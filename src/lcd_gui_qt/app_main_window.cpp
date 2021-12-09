@@ -47,7 +47,7 @@ namespace lcd
 		QToolButton* step_button   = new QToolButton();
 		QToolButton* stop_button   = new QToolButton();
 
-		play_button->setIcon(QIcon(":/res/icons/16/pause.png"));
+		play_button->setIcon(QIcon(":/res/icons/16/play.png"));
 		step_button->setIcon(QIcon(":/res/icons/16/step.png"));
 		stop_button->setIcon(QIcon(":/res/icons/16/stop.png"));
 
@@ -61,7 +61,7 @@ namespace lcd
 
 		m_simulation_speed_slider->setMinimum(-20);
 		m_simulation_speed_slider->setMaximum(0);
-		m_simulation_speed_slider->setValue(-9);
+		m_simulation_speed_slider->setValue(-5);
 		m_simulation_speed_slider->setOrientation(Qt::Orientation::Horizontal);
 		connect(m_simulation_speed_slider, &QSlider::valueChanged, this, &app_main_window::update_simulation_speed);
 		update_simulation_speed();
@@ -104,6 +104,7 @@ namespace lcd
 				}
 		});
 		connect(step_button, &QToolButton::clicked, this, [] { g_scheduler.tick(); });
+		g_scheduler.pause();
 		g_scheduler.start();
 	}
 
