@@ -20,7 +20,7 @@ namespace lcd
 		virtual double prescaler() const;
 
 	private:
-		std::chrono::duration<double>				   m_elapsed_time;
-		double										   m_prescaler;
+		std::chrono::duration<double> m_elapsed_time;
+		double						  m_prescaler;
 	};
 } // namespace lcd
