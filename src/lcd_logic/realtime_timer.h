@@ -4,10 +4,10 @@
 
 namespace lcd
 {
-	class std_timer : public i_timer
+	class realtime_timer : public i_timer
 	{
 	public:
-		std_timer();
+		realtime_timer();
 
 		virtual std::chrono::duration<double> elapsed() const override;
 
