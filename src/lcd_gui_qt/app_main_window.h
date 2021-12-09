@@ -1,6 +1,7 @@
 #pragma once
 
 #include <i_timer.h>
+#include <mutex>
 #include <qmainwindow>
 
 class QTimer;

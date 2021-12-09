@@ -4,7 +4,7 @@
 #include <lcd_controller.h>
 #include <logger.h>
 #include <scheduler.h>
-#include <std_timer.h>
+#include <realtime_timer.h>
 
 lcd::scheduler g_scheduler {};
 
@@ -16,7 +16,7 @@ namespace lcd
 		inline test_framework() : m_exit_flag { false }
 		{
 			logger::set_log_level(logger::log_level::error);
-			m_timer = std::make_shared<std_timer>();
+			m_timer = std::make_shared<realtime_timer>();
 			g_scheduler.set_timer(m_timer);
 		}
 
@@ -88,7 +88,7 @@ namespace lcd
 
 	private:
 		lcd_controller			   m_controller;
-		std::shared_ptr<std_timer> m_timer;
+		std::shared_ptr<realtime_timer> m_timer;
 		std::thread				   m_scheduler_thread;
 		std::atomic<bool>		   m_exit_flag;
 	};

@@ -3,10 +3,10 @@
 #include "lcd_controller.h"
 
 #include "data_bulk.h"
+#include "logging/logger_with_timing.h"
 #include "scheduler.h"
 
 #include <lcd_assert.h>
-#include <logger.h>
 
 extern lcd::scheduler g_scheduler;
 
@@ -169,9 +169,16 @@ namespace lcd
 
 	void lcd_controller::execute(execution_data const& data)
 	{
-		logger::debug(std::string("execution: ") + std::to_string(static_cast<int>(data.rs_mode)) + " " +
-					 std::to_string(static_cast<int>(data.rw_mode)) + " " +
-					 std::to_string(static_cast<int>(data.data)));
+		std::chrono::duration<double> elapsed { 0 };
+		if (i_timer_ptr tmr = g_scheduler.timer().lock())
+			{
+				elapsed = tmr->elapsed();
+			}
+
+		logger_with_timing::debug(elapsed,
+								  std::string("execution: ") + std::to_string(static_cast<int>(data.rs_mode)) + " " +
+									  std::to_string(static_cast<int>(data.rw_mode)) + " " +
+									  std::to_string(static_cast<int>(data.data)));
 
 		bool			   is_rs_mode	= static_cast<bool>(data.rs_mode);
 		bool			   is_rw_mode	= static_cast<bool>(data.rw_mode);
@@ -192,13 +199,13 @@ namespace lcd
 				data |= is_busy() << 7;
 
 				value_to_bus(data);
-				logger::info(std::string("Reading the ready flag: ") + std::to_string(data));
+				logger_with_timing::info(elapsed, std::string("Reading the ready flag: ") + std::to_string(data));
 				return;
 			}
 
 		if (m_busy)
 			{
-				logger::warn("The controller is in the busy mode, but a new command is incoming");
+				logger_with_timing::warn(elapsed, "The controller is in the busy mode, but a new command is incoming");
 				return;
 			}
 
@@ -240,7 +247,7 @@ namespace lcd
 						m_ddram_address_counter = 0x00;
 						m_scroll				= 0;
 						m_move_direction		= move_direction_enum::increment;
-						logger::info("Clear");
+						logger_with_timing::info(elapsed, "Clear");
 					};
 					break;
 				}
@@ -250,7 +257,7 @@ namespace lcd
 					instruction_impl = [ & ] {
 						m_ddram_address_counter = 0x00;
 						m_scroll				= 0;
-						logger::info("Return home");
+						logger_with_timing::info(elapsed, "Return home");
 					};
 					break;
 				}
@@ -264,11 +271,13 @@ namespace lcd
 							digital_operation::read(m_port.m_pins[ static_cast<int>(pinout::data1) ])
 								? display_scroll_mode_enum::scrolling
 								: display_scroll_mode_enum::no_scroll;
-						logger::info(
+						logger_with_timing::info(
+							elapsed,
 							std::string("Entry mode selection:") + "\n\tmove direction " +
-							(m_move_direction == move_direction_enum::increment ? "increment" : "decrement") +
-							"\n\tscroll mode " +
-							(m_display_scroll_mode == display_scroll_mode_enum::scrolling ? "scrolling" : "no scroll"));
+								(m_move_direction == move_direction_enum::increment ? "increment" : "decrement") +
+								"\n\tscroll mode " +
+								(m_display_scroll_mode == display_scroll_mode_enum::scrolling ? "scrolling"
+																							  : "no scroll"));
 					};
 					break;
 				}
@@ -293,10 +302,12 @@ namespace lcd
 						if (m_blink_mode == blink_mode_enum::blinking)
 							toggle_blink();
 
-						logger::info(std::string("Display control:") + "\n\tdisplay " +
-									 ((m_display_state == display_state_enum::on) ? "on" : "off") + "\n\tcursor " +
-									 ((m_cursor_visibility == cursor_visibility_enum::visible) ? "on" : "off") +
-									 "\n\tblink " + ((m_blink_mode == blink_mode_enum::blinking) ? "on" : "off"));
+						logger_with_timing::info(
+							elapsed,
+							std::string("Display control:") + "\n\tdisplay " +
+								((m_display_state == display_state_enum::on) ? "on" : "off") + "\n\tcursor " +
+								((m_cursor_visibility == cursor_visibility_enum::visible) ? "on" : "off") +
+								"\n\tblink " + ((m_blink_mode == blink_mode_enum::blinking) ? "on" : "off"));
 					};
 					break;
 				}
@@ -312,9 +323,10 @@ namespace lcd
 						if (ds)
 							display_shift(dir);
 
-						logger::info(std::string("Cursor/display shift:") + "\n\tdirection " +
-									 ((dir == move_direction_enum::right) ? "on" : "off") + "\n\tdisplay shift " +
-									 (ds ? "yes" : "no"));
+						logger_with_timing::info(elapsed,
+												 std::string("Cursor/display shift:") + "\n\tdirection " +
+													 ((dir == move_direction_enum::right) ? "on" : "off") +
+													 "\n\tdisplay shift " + (ds ? "yes" : "no"));
 					};
 					break;
 				}
@@ -334,13 +346,14 @@ namespace lcd
 										 ? fonts_enum::five_eight
 										 : fonts_enum::five_ten;
 
-						logger::info(
+						logger_with_timing::info(
+							elapsed,
 							std::string("Function set:") + "\n\tinterface " +
-							((m_interface_type == interface_type_enum::eight_pin_interface) ? "eight pin"
-																							: "four pin") +
-							"\n\tlines count " +
-							(m_display_lines_mode == display_lines_mode_enum::double_line ? "2 lines" : "1 line") +
-							"\n\tfont " + ((m_font == fonts_enum::five_eight) ? "5x8" : "5x10"));
+								((m_interface_type == interface_type_enum::eight_pin_interface) ? "eight pin"
+																								: "four pin") +
+								"\n\tlines count " +
+								(m_display_lines_mode == display_lines_mode_enum::double_line ? "2 lines" : "1 line") +
+								"\n\tfont " + ((m_font == fonts_enum::five_eight) ? "5x8" : "5x10"));
 					};
 					break;
 				}
@@ -349,7 +362,8 @@ namespace lcd
 					instruction_impl = [ & ] {
 						m_address_mode			= address_mode_enum::cgram;
 						m_cgram_address_counter = value_from_bus() & 0x3f;
-						logger::info(std::string("Setting CGRAM address: ") + std::to_string(m_cgram_address_counter));
+						logger_with_timing::info(
+							elapsed, std::string("Setting CGRAM address: ") + std::to_string(m_cgram_address_counter));
 					};
 					break;
 				}
@@ -358,7 +372,8 @@ namespace lcd
 					instruction_impl = [ & ] {
 						m_address_mode			= address_mode_enum::ddram;
 						m_ddram_address_counter = value_from_bus() & 0x7f;
-						logger::info(std::string("Setting DDRAM address: ") + std::to_string(m_ddram_address_counter));
+						logger_with_timing::info(
+							elapsed, std::string("Setting DDRAM address: ") + std::to_string(m_ddram_address_counter));
 					};
 					break;
 				}
@@ -372,8 +387,10 @@ namespace lcd
 								{
 									m_cgram[ m_cgram_address_counter ] = data.data;
 									cgram_shift(m_move_direction);
-									logger::info(std::string("Writing into CGRAM: ") + std::to_string(data.data) +
-												 "\t\nnew CGRAM address " + std::to_string(m_cgram_address_counter));
+									logger_with_timing::info(elapsed,
+															 std::string("Writing into CGRAM: ") +
+																 std::to_string(data.data) + "\t\nnew CGRAM address " +
+																 std::to_string(m_cgram_address_counter));
 									break;
 								}
 							case address_mode_enum::ddram:
@@ -383,8 +400,10 @@ namespace lcd
 									// TODO: the display should be shifted only if the flag is set
 									if (m_display_scroll_mode == display_scroll_mode_enum::scrolling)
 										display_shift(m_move_direction);
-									logger::info(std::string("Writing into DDRAM: ") + std::to_string(data.data) +
-												 "\t\nnew DDRAM address " + std::to_string(m_ddram_address_counter));
+									logger_with_timing::info(elapsed,
+															 std::string("Writing into DDRAM: ") +
+																 std::to_string(data.data) + "\t\nnew DDRAM address " +
+																 std::to_string(m_ddram_address_counter));
 									break;
 								}
 							}
@@ -401,8 +420,10 @@ namespace lcd
 									uint8_t data = m_cgram[ m_cgram_address_counter ];
 									value_to_bus(data);
 									cgram_shift(m_move_direction);
-									logger::info(std::string("Reading from CGRAM: ") + std::to_string(data) +
-												 "\t\nnew CGRAM address " + std::to_string(m_cgram_address_counter));
+									logger_with_timing::info(elapsed,
+															 std::string("Reading from CGRAM: ") +
+																 std::to_string(data) + "\t\nnew CGRAM address " +
+																 std::to_string(m_cgram_address_counter));
 									break;
 								}
 							case address_mode_enum::ddram:
@@ -410,8 +431,10 @@ namespace lcd
 									uint8_t data = m_ddram[ m_cgram_address_counter ];
 									value_to_bus(data);
 									cursor_shift(m_move_direction);
-									logger::info(std::string("Reading from DDRAM: ") + std::to_string(data) +
-												 "\t\nnew DDRAM address " + std::to_string(m_ddram_address_counter));
+									logger_with_timing::info(elapsed,
+															 std::string("Reading from DDRAM: ") +
+																 std::to_string(data) + "\t\nnew DDRAM address " +
+																 std::to_string(m_ddram_address_counter));
 									break;
 								}
 							}
