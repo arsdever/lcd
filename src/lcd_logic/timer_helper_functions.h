@@ -6,7 +6,7 @@ namespace lcd
 {
 	// https://stackoverflow.com/a/16606128/10185183
 	template <typename T>
-	std::string to_string_with_precision(const T a_value, const int n = 6)
+	inline std::string to_string_with_precision(const T a_value, const int n = 6)
 	{
 		std::ostringstream out;
 		out.precision(n);
@@ -14,7 +14,7 @@ namespace lcd
 		return out.str();
 	}
 
-	std::string time_string(double time, int precision = 6)
+	inline std::string time_string(double time, int precision = 6)
 	{
 		std::string suffix;
 		if (time < .000000001)
@@ -54,4 +54,6 @@ namespace lcd
 
 		return to_string_with_precision(time, precision) + suffix;
 	}
+
+	inline std::string to_string(std::chrono::duration<double> const& dur) { return time_string(dur.count()); }
 } // namespace lcd

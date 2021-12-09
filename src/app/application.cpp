@@ -2,18 +2,18 @@
 
 #include "app_main_window.h"
 
+#include <logger.h>
+#include <logging/log_widget.h>
 #include <pcb_graphics_settings.h>
 #include <qapplication.h>
 #include <qt_display.h>
 #include <scheduler.h>
-#include <std_timer.h>
-#include <logging/log_widget.h>
+#include <step_timer.h>
 
 // smaller value will decrease the speed of the simulation
 // 1s = 100us
-constexpr double  g_timing_ratio = .01f;
-lcd::scheduler	  g_scheduler;
-std::atomic<bool> g_exit_flag = false;
+constexpr double	  g_timing_ratio = 10.f;
+extern lcd::scheduler g_scheduler;
 
 namespace lcd
 {
@@ -35,9 +35,8 @@ int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 
-	lcd::i_timer_ptr tmr = std::make_shared<lcd::std_timer>();
-
-	g_scheduler.set_timer(tmr);
+	lcd::i_timer_ptr tmr = std::make_shared<lcd::step_timer>();
+	tmr->set_prescaler(g_timing_ratio);
 
 	lcd::qt_display*		panel = new lcd::qt_display {};
 	lcd::log_widget			log_wdg;
@@ -85,95 +84,135 @@ int main(int argc, char** argv)
 		controller.m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(0.0f);
 	};
 
-	std::chrono::time_point last_tick = std::chrono::system_clock::now();
 	std::thread([ = ]() {
-		instruction(*controller, 0, 0, 1);
-		std::this_thread::sleep_for(std::chrono::milliseconds(160));
-		instruction(*controller, 0, 0, 0b00001100);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 0, 0, 0b00111000);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		lcd::scheduler::task_id_t idx =
+			g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 1); }, {});
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001100); },
+								   std::chrono::milliseconds(160),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00111000); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
 
-		std::string text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget "
+		std::string text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean "
+						   "commodo ligula eget "
 						   "dolor. Aenean massa. Cum sociis natoque pen";
 
 		for (char c : text)
 			{
-				instruction(*controller, 1, 0, c);
-				std::this_thread::sleep_for(std::chrono::milliseconds(4));
+				idx = g_scheduler.add_task([ instruction, controller, c ] { instruction(*controller, 1, 0, c); },
+										   std::chrono::milliseconds(4),
+										   true,
+										   idx);
 			}
 
-		std::this_thread::sleep_for(std::chrono::seconds(1)); // show for a second
-		instruction(*controller, 0, 0, 0b00110000);
-		std::this_thread::sleep_for(std::chrono::seconds(1)); // set 1 line mode and show a second
-		instruction(*controller, 0, 0, 0b00111000);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4)); // switch back to 2 line mode
-		instruction(*controller, 1, 0, 0b00000001);
-		std::this_thread::sleep_for(std::chrono::seconds(1)); // show the 0x01 character element
-		instruction(*controller, 0, 0, 0b00111000);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 0, 0, 0b01001000); // set cgram 0x08 (0x01 character)
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00001110); // draw the character
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00011011);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00010001);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00010001);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00011111);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00011111);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00011111);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 1, 0, 0b00011111);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
-		instruction(*controller, 0, 0, 0b00011100);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		instruction(*controller, 0, 0, 0b00011000);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		tmr->set_prescaler(1.f);
+		idx = g_scheduler.add_task([] {}, std::chrono::milliseconds(100), true, idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00110000); },
+								   std::chrono::milliseconds(100),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00111000); },
+								   std::chrono::milliseconds(100),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00000001); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00111000); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b01001000); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00001110); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00011011); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00010001); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00010001); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00011111); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00011111); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00011111); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 1, 0, 0b00011111); },
+								   std::chrono::milliseconds(4),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00011100); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00011000); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([] {}, std::chrono::seconds(1), true, idx);
 		for (int i = 0; i < 256; ++i)
 			{
-				instruction(*controller, 0, 0, 0b00011000);
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00011000); },
+										   std::chrono::milliseconds(4),
+										   true,
+										   idx);
 			}
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		instruction(*controller, 0, 0, 0b00000001);
-		std::this_thread::sleep_for(std::chrono::milliseconds(160));
-		instruction(*controller, 0, 0, 0b00001111);
-		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00000001); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001111); },
+								   std::chrono::milliseconds(160),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001111); },
+								   std::chrono::milliseconds(160),
+								   true,
+								   idx);
 		std::string short_text = "Short text";
 		for (char c : short_text)
 			{
-				instruction(*controller, 1, 0, c);
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				idx = g_scheduler.add_task([ instruction, controller, c ] { instruction(*controller, 1, 0, c); },
+										   std::chrono::milliseconds(100),
+										   true,
+										   idx);
 			}
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		instruction(*controller, 0, 0, 0b00001110);
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		instruction(*controller, 0, 0, 0b00001100);
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		instruction(*controller, 0, 0, 0b00001101);
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001110); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001100); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
+		idx = g_scheduler.add_task([ instruction, controller ] { instruction(*controller, 0, 0, 0b00001101); },
+								   std::chrono::seconds(1),
+								   true,
+								   idx);
 	}).detach();
-	std::thread scheduler_loop([ &last_tick ] {
-		g_scheduler.start();
-		while (!g_exit_flag)
-			{
-				// std::chrono::duration elapsed = std::chrono::system_clock::now() - last_tick;
-				// last_tick += elapsed;
-				// std::chrono::duration<double> doubleElapsed = elapsed;
-				// doubleElapsed /= g_timing_ratio;
-				g_scheduler.tick();
-			}
-	});
 	panel->show();
 	log_wdg.show();
-	int result	= app.exec();
-	g_exit_flag = true;
-	scheduler_loop.join();
+	int result = app.exec();
 	return result;
 }

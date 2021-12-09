@@ -1,9 +1,13 @@
 <RCC>
-    <qresource prefix="/">
-        <file>res/icons/16/clear.png</file>
-        <file>res/icons/16/debug.png</file>
-        <file>res/icons/16/error.png</file>
-        <file>res/icons/16/info.png</file>
-        <file>res/icons/16/warning.png</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>res/icons/16/clear.png</file>
+    <file>res/icons/16/debug.png</file>
+    <file>res/icons/16/error.png</file>
+    <file>res/icons/16/info.png</file>
+    <file>res/icons/16/warning.png</file>
+    <file>res/icons/16/pause.png</file>
+    <file>res/icons/16/play.png</file>
+    <file>res/icons/16/step.png</file>
+    <file>res/icons/16/stop.png</file>
+  </qresource>
 </RCC>
