@@ -20,7 +20,7 @@ lcd::scheduler g_scheduler;
 
 namespace lcd
 {
-	app_main_window::app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent)
+	app_main_window::app_main_window(float target_fps, timer_wptr simulation_timer, QWidget* parent)
 		: QMainWindow(parent), m_simulation_timer(simulation_timer), m_fps(target_fps)
 	{
 		g_scheduler.set_timer(m_simulation_timer);
@@ -134,7 +134,7 @@ namespace lcd
 
 	void app_main_window::update_simulation_speed()
 	{
-		if (i_timer_ptr timer = m_simulation_timer.lock())
+		if (timer_ptr timer = m_simulation_timer.lock())
 			{
 				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
 			}

@@ -2,6 +2,7 @@
 
 #include "app_main_window.h"
 
+#include <lcd_controller.h>
 #include <logger.h>
 #include <logging/log_widget.h>
 #include <pcb_graphics_settings.h>
@@ -35,7 +36,7 @@ int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 
-	lcd::i_timer_ptr tmr = std::make_shared<lcd::step_timer>();
+	lcd::timer_ptr tmr = std::make_shared<lcd::step_timer>();
 	tmr->set_prescaler(g_timing_ratio);
 
 	lcd::qt_display*		panel = new lcd::qt_display {};

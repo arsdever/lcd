@@ -20,7 +20,7 @@ namespace lcd
 		uuid_t handle() const { return m_uuid; }
 
 	private:
-		event_t&	m_event;
-		uuid_t m_uuid;
+		event_t& m_event;
+		uuid_t	 m_uuid;
 	};
 } // namespace lcd

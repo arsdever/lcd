@@ -13,4 +13,4 @@ namespace lcd
 		static void critical(std::chrono::duration<double> const& time, std::string const& message);
 		static void debug(std::chrono::duration<double> const& time, std::string const& message);
 	};
-}
+} // namespace lcd

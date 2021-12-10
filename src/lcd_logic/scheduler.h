@@ -1,6 +1,6 @@
 #pragma once
 
-#include <i_timer.h>
+#include <lcd_logic_prototypes.h>
 
 namespace lcd
 {
@@ -21,23 +21,26 @@ namespace lcd
 
 	public:
 		scheduler();
-		scheduler(i_timer_wptr timer);
+		scheduler(timer_wptr timer);
 
-		void		 set_timer(i_timer_wptr timer);
-		i_timer_wptr timer() const;
-		task_id_t	 add_task(task_t task, duration_t delay, bool sequental = false, task_id_t = std::numeric_limits<task_id_t>::max());
-		void		 start();
-		void		 run();
-		void		 pause();
-		void		 stop();
-		void		 tick();
-		state		 get_state() const;
+		void	   set_timer(timer_wptr timer);
+		timer_wptr timer() const;
+		task_id_t  add_task(task_t	   task,
+							duration_t delay,
+							bool	   sequental = false,
+							task_id_t			 = std::numeric_limits<task_id_t>::max());
+		void	   start();
+		void	   run();
+		void	   pause();
+		void	   stop();
+		void	   tick();
+		state	   get_state() const;
 
 	private:
-		task_id_t	 m_task_id_counter;
-		schedule_t	 m_tasks;
-		i_timer_wptr m_timer;
-		state		 m_state;
-		std::thread	 m_execution_thread;
+		task_id_t	m_task_id_counter;
+		schedule_t	m_tasks;
+		timer_wptr	m_timer;
+		state		m_state;
+		std::thread m_execution_thread;
 	};
 } // namespace lcd
