@@ -3,8 +3,8 @@
 #include <boost/test/unit_test.hpp>
 #include <lcd_controller.h>
 #include <logger.h>
-#include <scheduler.h>
 #include <realtime_timer.h>
+#include <scheduler.h>
 
 lcd::scheduler g_scheduler {};
 
@@ -84,13 +84,13 @@ namespace lcd
 		}
 
 		inline lcd_controller& controller() { return m_controller; }
-		inline i_timer_ptr	   timer() { return m_timer; }
+		inline timer_ptr	   timer() { return m_timer; }
 
 	private:
-		lcd_controller			   m_controller;
+		lcd_controller					m_controller;
 		std::shared_ptr<realtime_timer> m_timer;
-		std::thread				   m_scheduler_thread;
-		std::atomic<bool>		   m_exit_flag;
+		std::thread						m_scheduler_thread;
+		std::atomic<bool>				m_exit_flag;
 	};
 
 	BOOST_AUTO_TEST_SUITE(lcd_logic_test_suite)

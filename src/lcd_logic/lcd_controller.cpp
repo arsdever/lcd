@@ -3,6 +3,7 @@
 #include "lcd_controller.h"
 
 #include "data_bulk.h"
+#include "i_timer.h"
 #include "logging/logger_with_timing.h"
 #include "scheduler.h"
 
@@ -170,7 +171,7 @@ namespace lcd
 	void lcd_controller::execute(execution_data const& data)
 	{
 		std::chrono::duration<double> elapsed { 0 };
-		if (i_timer_ptr tmr = g_scheduler.timer().lock())
+		if (timer_ptr tmr = g_scheduler.timer().lock())
 			{
 				elapsed = tmr->elapsed();
 			}
