@@ -1,13 +1,9 @@
 #pragma once
 
-#include <qwidget>
-
-class QLabel;
+#include <lcd_logic_prototypes.h>
 
 namespace lcd
 {
-	class pin;
-
 	class pin_tooltip : public QWidget
 	{
 	public:

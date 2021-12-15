@@ -1,7 +1,6 @@
 #pragma once
 
 #include <display_settings.h>
-#include <qwidget>
 
 namespace lcd
 {
@@ -28,7 +27,7 @@ namespace lcd
 
 	private:
 		display_settings m_settings;
-		float m_brightness;
-		float m_contrast;
+		float			 m_brightness;
+		float			 m_contrast;
 	};
 } // namespace lcd

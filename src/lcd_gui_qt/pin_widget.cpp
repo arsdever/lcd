@@ -1,13 +1,11 @@
 #include <stdafx.h>
 
 #include "pin_widget.h"
+
+#include "pcb_graphics_settings.h"
 #include "pin_tooltip.h"
 
-#include <pcb_graphics_settings.h>
 #include <port.h>
-#include <qlabel>
-#include <qpainter>
-#include <qpaintevent>
 
 namespace lcd
 {
@@ -44,7 +42,7 @@ namespace lcd
 	{
 		m_is_mouse_hover = true;
 		m_tooltip->show();
-		m_tooltip->move(QCursor::pos() + QPoint(- m_tooltip->width() / 2.0, 5));
+		m_tooltip->move(QCursor::pos() + QPoint(-m_tooltip->width() / 2.0, 5));
 		update();
 	}
 

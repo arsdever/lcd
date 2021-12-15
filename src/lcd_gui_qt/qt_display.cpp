@@ -9,11 +9,6 @@
 #include "pcb_graphics_settings.h"
 #include "port_widget.h"
 
-#include <qmargins>
-#include <qpainter>
-#include <qpaintevent>
-#include <qstyle>
-
 #define max(a, b)	   (((a) > (b)) ? (a) : (b))
 #define min(a, b)	   (((a) < (b)) ? (a) : (b))
 #define clamp(a, b, c) (min(max(a, b), c))

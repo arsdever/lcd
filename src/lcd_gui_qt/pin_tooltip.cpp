@@ -5,7 +5,6 @@
 #include "pcb_graphics_settings.h"
 
 #include <pin.h>
-#include <qlabel>
 
 namespace lcd
 {

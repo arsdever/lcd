@@ -62,8 +62,7 @@ namespace lcd
 
 				// draw the pass through hole
 				painter.setPen(QPen(g_pcb_graphics_settings.light_color, trace_width / 2.0));
-				painter.drawEllipse(
-					center + QPointF(0, trace_expansion_amount), trace_width / 2.0, trace_width / 2.0);
+				painter.drawEllipse(center + QPointF(0, trace_expansion_amount), trace_width / 2.0, trace_width / 2.0);
 			}
 	}
 } // namespace lcd
