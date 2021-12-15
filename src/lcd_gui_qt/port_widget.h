@@ -1,7 +1,5 @@
 #pragma once
 
-#include <qwidget>
-
 namespace lcd
 {
 	class pin;

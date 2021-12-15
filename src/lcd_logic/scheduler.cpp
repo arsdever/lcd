@@ -1,16 +1,18 @@
 #include <stdafx.h>
 
-#include <scheduler.h>
+#include "scheduler.h"
+
+#include "i_timer.h"
 
 namespace lcd
 {
 	scheduler::scheduler() : m_timer(), m_task_id_counter { 0 }, m_state { state::running } { }
 
-	scheduler::scheduler(i_timer_wptr timer) : m_timer(timer), m_task_id_counter { 0 } { }
+	scheduler::scheduler(timer_wptr timer) : m_timer(timer), m_task_id_counter { 0 } { }
 
-	void scheduler::set_timer(i_timer_wptr timer) { m_timer = timer; }
+	void scheduler::set_timer(timer_wptr timer) { m_timer = timer; }
 
-	i_timer_wptr scheduler::timer() const { return m_timer; }
+	timer_wptr scheduler::timer() const { return m_timer; }
 
 	scheduler::task_id_t scheduler::add_task(task_t task, duration_t delay, bool sequental, task_id_t after)
 	{
@@ -36,7 +38,7 @@ namespace lcd
 
 	void scheduler::start()
 	{
-		if (i_timer_ptr timer = m_timer.lock())
+		if (timer_ptr timer = m_timer.lock())
 			timer->delta();
 
 		m_execution_thread = std::thread { [ = ] {
@@ -60,7 +62,7 @@ namespace lcd
 
 	void scheduler::tick()
 	{
-		if (i_timer_ptr timer = m_timer.lock())
+		if (timer_ptr timer = m_timer.lock())
 			{
 				timer->frame();
 				duration_t delta = timer->delta();

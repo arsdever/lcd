@@ -1,12 +1,11 @@
 #pragma once
 
+#include <lcd_logic_prototypes.h>
+
 #include <i_symbol_getter.h>
-#include <lcd_controller.h>
 
 namespace lcd
 {
-	extern std::array<std::array<char, 8>, 255> default_font;
-
 	class display : public i_symbol_getter
 	{
 	public:
@@ -31,8 +30,8 @@ namespace lcd
 		void on_controller_changed(event_t callback);
 
 	protected:
-		virtual uint8_t		address_of_symbol(size_t row, size_t column) const;
-		virtual char symbol_at(size_t row, size_t column) const;
+		virtual uint8_t address_of_symbol(size_t row, size_t column) const;
+		virtual char	symbol_at(size_t row, size_t column) const;
 
 #pragma region i_symbol_getter
 

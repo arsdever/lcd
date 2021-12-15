@@ -1,13 +1,9 @@
 #pragma once
 
-#include "port.h"
+#include <port.h>
 
 namespace lcd
 {
-	class lcd_controller;
-	using lcd_controller_ptr  = std::shared_ptr<lcd_controller>;
-	using lcd_controller_wptr = std::weak_ptr<lcd_controller>;
-
 	class lcd_controller
 	{
 	public:

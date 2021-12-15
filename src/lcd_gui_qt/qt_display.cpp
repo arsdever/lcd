@@ -5,13 +5,9 @@
 #include "decorations/screen_border.h"
 #include "display_content.h"
 #include "display_settings.h"
+#include "lcd_controller.h"
 #include "pcb_graphics_settings.h"
 #include "port_widget.h"
-
-#include <qmargins>
-#include <qpainter>
-#include <qpaintevent>
-#include <qstyle>
 
 #define max(a, b)	   (((a) > (b)) ? (a) : (b))
 #define min(a, b)	   (((a) < (b)) ? (a) : (b))

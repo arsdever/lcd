@@ -2,11 +2,6 @@
 
 namespace lcd
 {
-	class i_timer;
-	using i_timer_ptr  = std::shared_ptr<i_timer>;
-	using i_timer_wptr = std::weak_ptr<i_timer>;
-	using i_timer_uptr = std::unique_ptr<i_timer>;
-
 	class i_timer
 	{
 	public:

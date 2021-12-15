@@ -1,9 +1,10 @@
 #pragma once
 
+#include <logging_prototypes.h>
+
 #include "spdlog_helper.h"
 
 #include <log_history_sink.h>
-#include <logging_prototypes.h>
 #include <spdlog/sinks/base_sink.h>
 
 // https://spdlog.docsforge.com/v1.x/4.sinks/#implementing-your-own-sink

@@ -9,4 +9,4 @@ namespace lcd
 
 		virtual std::array<char, 8> get_symbol_ddram(size_t row, size_t column) const = 0;
 	};
-}
+} // namespace lcd

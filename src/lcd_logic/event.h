@@ -22,10 +22,7 @@ namespace lcd
 			return connection_t(*this, handler_uuid);
 		}
 
-		void operator-=(connection_t const& connection)
-		{
-			m_handlers.erase(connection.handle());
-		}
+		void operator-=(connection_t const& connection) { m_handlers.erase(connection.handle()); }
 
 		void invoke(args... arguments)
 		{

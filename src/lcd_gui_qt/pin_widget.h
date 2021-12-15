@@ -1,12 +1,10 @@
 #pragma once
 
-#include <qwidget>
+#include <lcd_gui_qt_prototypes.h>
+#include <lcd_logic_prototypes.h>
 
 namespace lcd
 {
-	class pin;
-	class pin_tooltip;
-
 	class pin_widget : public QWidget
 	{
 		Q_OBJECT
@@ -20,8 +18,8 @@ namespace lcd
 		virtual void leaveEvent(QEvent* e) override;
 
 	private:
-		pin* m_underlying_pin;
-		bool m_is_mouse_hover;
+		pin*		 m_underlying_pin;
+		bool		 m_is_mouse_hover;
 		pin_tooltip* m_tooltip;
 	};
 } // namespace lcd

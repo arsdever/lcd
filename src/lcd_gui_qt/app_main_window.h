@@ -1,7 +1,7 @@
 #pragma once
 
-#include <i_timer.h>
-#include <mutex>
+#include <lcd_logic_prototypes.h>
+
 #include <qmainwindow>
 
 class QTimer;
@@ -19,7 +19,7 @@ namespace lcd
 		using slider_change_callback_t = std::function<void(float)>;
 
 	public:
-		app_main_window(float target_fps, i_timer_wptr simulation_timer, QWidget* parent = nullptr);
+		app_main_window(float target_fps, timer_wptr simulation_timer, QWidget* parent = nullptr);
 
 		void on_brightness_slider(slider_change_callback_t cb);
 		void on_contrast_slider(slider_change_callback_t cb);
@@ -30,7 +30,7 @@ namespace lcd
 
 	private:
 		QMetaObject::Connection	 m_status_bar_update_connection;
-		i_timer_wptr			 m_simulation_timer;
+		timer_wptr				 m_simulation_timer;
 		QTimer*					 m_fps_timer;
 		QSlider*				 m_simulation_speed_slider;
 		QSlider*				 m_brightness_slider;
