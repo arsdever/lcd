@@ -4,9 +4,6 @@
 
 #include "pcb_graphics_settings.h"
 
-#include <qpainter>
-#include <qpaintevent>
-
 namespace lcd
 {
 	namespace

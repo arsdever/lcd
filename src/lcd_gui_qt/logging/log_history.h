@@ -9,7 +9,10 @@ namespace lcd
 		, public std::enable_shared_from_this<log_history>
 	{
 	private:
-		using updated_e = std::function<void()>;
+		template <typename T>
+		using container_t = std::vector<T>;
+		using updated_e	  = std::function<void()>;
+		using entry_t	  = std::tuple<logger::log_level, std::string>;
 
 	public:
 		log_history();
@@ -25,7 +28,7 @@ namespace lcd
 		int count() const;
 
 	private:
-		std::vector<std::tuple<logger::log_level, std::string>> m_content;
-		updated_e												m_on_updated;
+		container_t<entry_t> m_content;
+		updated_e			 m_on_updated;
 	};
 } // namespace lcd

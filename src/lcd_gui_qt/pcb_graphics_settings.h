@@ -1,7 +1,5 @@
 #pragma once
 
-#include <qcolor>
-
 namespace lcd
 {
 	struct pcb_graphics_settings

@@ -7,7 +7,6 @@
 #include "log_history_model.h"
 
 #include <i_log_history.h>
-#include <qtableview>
 
 namespace lcd
 {

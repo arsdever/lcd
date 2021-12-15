@@ -2,7 +2,6 @@
 
 #include <lcd_logic_prototypes.h>
 
-#include <mutex>
 #include <qmainwindow>
 
 class QTimer;

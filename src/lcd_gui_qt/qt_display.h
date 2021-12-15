@@ -1,8 +1,6 @@
 #pragma once
 
 #include <display.h>
-#include <i_timer.h>
-#include <qwidget.h>
 
 namespace lcd
 {

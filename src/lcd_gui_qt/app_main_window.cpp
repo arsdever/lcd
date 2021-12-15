@@ -6,13 +6,8 @@
 #include "qt_display.h"
 
 #include <cmath>
+#include <i_timer.h>
 #include <logger.h>
-#include <qhboxlayout>
-#include <qslider>
-#include <qstatusbar>
-#include <qtimer>
-#include <qtoolbar>
-#include <qtoolbutton>
 #include <scheduler.h>
 #include <timer_helper_functions.h>
 
