@@ -1,5 +1,4 @@
 #include <stdafx.h>
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE lcd_logic
 #include <boost/test/unit_test.hpp>
 #include <lcd_controller.h>
