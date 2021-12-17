@@ -20,9 +20,9 @@ option (COVERAGE_REPORT "Enable coverage reporting" OFF)
 if (COVERAGE_REPORT AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # Add required flags (GCC & LLVM/Clang)
   add_compile_options (
-    -O0        # no optimization
-    -g         # generate debug info
-    --coverage # sets all required flags
+	-O0        # no optimization
+	-g         # generate debug info
+	--coverage # sets all required flags
   )
   add_link_options (--coverage)
 endif ()
