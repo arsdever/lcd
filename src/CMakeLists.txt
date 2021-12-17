@@ -17,9 +17,3 @@ endif()
 
 add_subdirectory (logging)
 add_subdirectory (lcd_logic)
-
-if (${BUILD_TESTS})
-	message ("Tests enabled")
-	enable_testing ()
-	add_subdirectory (test)
-endif ()
