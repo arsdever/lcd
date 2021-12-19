@@ -3,8 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-option (BUILD_TESTS OFF)
-
 project ("lcd")
 
 set(CMAKE_AUTOMOC ON)
@@ -16,7 +14,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
+option (BUILD_TESTS "Enable coverage reporting" OFF)
 option (COVERAGE_REPORT "Enable coverage reporting" OFF)
+
 if (COVERAGE_REPORT AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # Add required flags (GCC & LLVM/Clang)
   add_compile_options (
@@ -27,7 +27,7 @@ if (COVERAGE_REPORT AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   add_link_options (--coverage)
 endif ()
 
-if (${BUILD_TESTS})
+if (BUILD_TESTS)
 	message ("Tests enabled")
 	enable_testing ()
 	add_subdirectory (test)

@@ -16,8 +16,8 @@
       "variables": [
         {
           "name": "BUILD_TESTS",
-          "value": "True",
-          "type": "BOOL"
+          "value": "ON",
+          "type": "STRING"
         }
       ]
     },

@@ -28,5 +28,5 @@ Just make sure to update the `CMake toolchain file` property in the `CMakeSettin
 cd <repo_folder>
 mkdir build
 cd build
-cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH="<path_to_vcpkg_repo>/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE:STRING="<configuration>" -G "Ninja" -DBUILD_TESTS:BOOL="True" .. 
+cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH="<path_to_vcpkg_repo>/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE:STRING="<configuration>" -G "Ninja" .. 
 ```
