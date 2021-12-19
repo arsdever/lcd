@@ -28,19 +28,19 @@ namespace lcd
 
 		QStatusBar* sb = statusBar();
 		if (sb == nullptr)
-			{
-				sb = new QStatusBar {};
-				setStatusBar(sb);
-			}
+		{
+			sb = new QStatusBar{};
+			setStatusBar(sb);
+		}
 
 		m_fps_timer->start();
 
-		m_simulation_speed_slider  = new QSlider();
-		QToolBar*	 toolbar	   = new QToolBar();
-		QToolBar*	 timer_toolbar = new QToolBar();
-		QToolButton* play_button   = new QToolButton();
-		QToolButton* step_button   = new QToolButton();
-		QToolButton* stop_button   = new QToolButton();
+		m_simulation_speed_slider = new QSlider();
+		QToolBar* toolbar = new QToolBar();
+		QToolBar* timer_toolbar = new QToolBar();
+		QToolButton* play_button = new QToolButton();
+		QToolButton* step_button = new QToolButton();
+		QToolButton* stop_button = new QToolButton();
 
 		play_button->setIcon(QIcon(":/res/icons/16/play.png"));
 		step_button->setIcon(QIcon(":/res/icons/16/step.png"));
@@ -75,29 +75,29 @@ namespace lcd
 		m_contrast_slider->setValue(100);
 		m_contrast_slider->setOrientation(Qt::Orientation::Horizontal);
 
-		connect(m_brightness_slider, &QSlider::valueChanged, this, [ = ](int value) {
+		connect(m_brightness_slider, &QSlider::valueChanged, this, [=](int value) {
 			m_brightness_slider_cb ? m_brightness_slider_cb(value / 100.0f) : void();
-		});
-		connect(m_contrast_slider, &QSlider::valueChanged, this, [ = ](int value) {
+			});
+		connect(m_contrast_slider, &QSlider::valueChanged, this, [=](int value) {
 			m_contrast_slider_cb ? m_contrast_slider_cb(value / 100.0f) : void();
-		});
+			});
 
 		toolbar->setOrientation(Qt::Vertical);
 		toolbar->addWidget(m_brightness_slider);
 		toolbar->addWidget(m_contrast_slider);
 
-		connect(play_button, &QToolButton::clicked, this, [ play_button ] {
+		connect(play_button, &QToolButton::clicked, this, [play_button] {
 			if (g_scheduler.get_state() == scheduler::state::running)
-				{
-					g_scheduler.pause();
-					play_button->setIcon(QIcon(":/res/icons/16/play.png"));
-				}
+			{
+				g_scheduler.pause();
+				play_button->setIcon(QIcon(":/res/icons/16/play.png"));
+			}
 			else
-				{
-					g_scheduler.run();
-					play_button->setIcon(QIcon(":/res/icons/16/pause.png"));
-				}
-		});
+			{
+				g_scheduler.run();
+				play_button->setIcon(QIcon(":/res/icons/16/pause.png"));
+			}
+			});
 		connect(step_button, &QToolButton::clicked, this, [] { g_scheduler.tick(); });
 		g_scheduler.pause();
 		g_scheduler.start();
@@ -111,27 +111,27 @@ namespace lcd
 	{
 		QStatusBar* sb = statusBar();
 		if (sb == nullptr)
-			{
-				logger::warn("Status bar is not initialized");
-				disconnect(m_status_bar_update_connection);
-				return;
-			}
+		{
+			logger::warn("Status bar is not initialized");
+			disconnect(m_status_bar_update_connection);
+			return;
+		}
 
 		if (auto timer = m_simulation_timer.lock())
-			{
-				double elapsed = timer->elapsed().count();
+		{
+			double elapsed = timer->elapsed().count();
 
-				sb->showMessage(tr("delta time: %1 prescaler: %2")
-									.arg(time_string(elapsed).c_str())
-									.arg(time_string(pow(10, m_simulation_speed_slider->value()), 1).c_str()));
-			}
+			sb->showMessage(tr("delta time: %1 prescaler: %2")
+				.arg(time_string(elapsed).c_str())
+				.arg(time_string(pow(10, m_simulation_speed_slider->value()), 1).c_str()));
+		}
 	}
 
 	void app_main_window::update_simulation_speed()
 	{
 		if (timer_ptr timer = m_simulation_timer.lock())
-			{
-				timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
-			}
+		{
+			timer->set_prescaler(pow(10, m_simulation_speed_slider->value()));
+		}
 	}
 } // namespace lcd
