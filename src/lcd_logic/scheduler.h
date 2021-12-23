@@ -7,10 +7,11 @@ namespace lcd
 	class scheduler
 	{
 	public:
-		using task_t	 = std::function<void()>;
-		using duration_t = std::chrono::duration<double>;
-		using schedule_t = std::list<std::tuple<task_t, duration_t, size_t, std::chrono::system_clock::time_point>>;
-		using task_id_t	 = uint64_t;
+		using task_t		   = std::function<void()>;
+		using duration_t	   = std::chrono::duration<double>;
+		using schedule_entry_t = std::tuple<task_t, duration_t, size_t, std::chrono::system_clock::time_point>;
+		using schedule_t	   = std::list<schedule_entry_t>;
+		using task_id_t		   = uint64_t;
 
 		enum class state
 		{
@@ -37,10 +38,14 @@ namespace lcd
 		state	   get_state() const;
 
 	private:
+		void push_task(schedule_entry_t const& entry);
+
+	private:
 		task_id_t	m_task_id_counter;
 		schedule_t	m_tasks;
 		timer_wptr	m_timer;
 		state		m_state;
 		std::thread m_execution_thread;
+		std::mutex	m_tasks_mutex;
 	};
 } // namespace lcd

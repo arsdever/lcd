@@ -16,6 +16,7 @@ namespace lcd
 
 	scheduler::task_id_t scheduler::add_task(task_t task, duration_t delay, bool sequental, task_id_t after)
 	{
+		std::lock_guard<std::mutex> lock(m_tasks_mutex);
 		if (sequental)
 			{
 				schedule_t::iterator task_with_id;
@@ -32,7 +33,7 @@ namespace lcd
 
 				delay += std::get<1>(*task_with_id);
 			}
-		m_tasks.push_back({ task, delay, m_task_id_counter++, std::chrono::system_clock::now() });
+		push_task({ task, delay, m_task_id_counter++, std::chrono::system_clock::now() });
 		return m_task_id_counter;
 	}
 
@@ -62,6 +63,7 @@ namespace lcd
 
 	void scheduler::tick()
 	{
+		std::lock_guard<std::mutex> lock(m_tasks_mutex);
 		if (timer_ptr timer = m_timer.lock())
 			{
 				timer->frame();
@@ -82,4 +84,17 @@ namespace lcd
 	}
 
 	scheduler::state scheduler::get_state() const { return m_state; }
+
+	void scheduler::push_task(schedule_entry_t const& entry)
+	{
+		static constexpr auto schedule_entry_comparer = [](schedule_entry_t const& a,
+														   schedule_entry_t const& b) -> bool {
+			return std::get<1>(a) > std::get<1>(b);
+		};
+
+		auto it = std::find_if(m_tasks.begin(), m_tasks.end(), [ &entry ](schedule_entry_t const& item) -> bool {
+			return schedule_entry_comparer(item, entry);
+		});
+		m_tasks.insert(it, entry);
+	}
 } // namespace lcd
