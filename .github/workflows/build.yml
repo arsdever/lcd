@@ -109,8 +109,10 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
         -DCMAKE_INSTALL_PREFIX:PATH="${{ github.workspace }}/build/install/${{ matrix.configuration }}_${{ matrix.platrofm }}"
         -DCMAKE_TOOLCHAIN_FILE="${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake"
+        -DBUILD_TESTS=ON
 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.configuration }}
+    - name: Build solution
+      run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.configuration }} -j4
 
+    - name: Run tests
+      run: ctest -j4 --test-dir ${{ github.workspace }}/build --output-on-failure -C ${{ matrix.configuration }}

@@ -1,10 +1,12 @@
 #include <stdafx.h>
 #define BOOST_TEST_MODULE lcd_logic
 #include <boost/test/unit_test.hpp>
+#include <condition_variable>
 #include <lcd_controller.h>
 #include <logger.h>
-#include <realtime_timer.h>
+#include <mutex>
 #include <scheduler.h>
+#include <step_timer.h>
 
 lcd::scheduler g_scheduler {};
 
@@ -16,7 +18,7 @@ namespace lcd
 		inline test_framework() : m_exit_flag { false }
 		{
 			logger::set_log_level(logger::log_level::error);
-			m_timer		 = std::make_shared<realtime_timer>();
+			m_timer		 = std::make_shared<step_timer>();
 			m_controller = std::make_shared<lcd_controller>();
 			g_scheduler.set_timer(m_timer);
 		}
@@ -68,14 +70,23 @@ namespace lcd
 			m_controller->m_port.m_pins[ static_cast<int>(lcd::lcd_controller::pinout::en) ].set_voltage(0.0f);
 		}
 
+		inline void wait_for(std::chrono::duration<double> dur)
+		{
+			std::unique_lock<std::mutex> lock(m_mutex);
+			g_scheduler.add_task([ &cv = m_condition_variable ] { cv.notify_one(); }, dur);
+			m_condition_variable.wait(lock);
+		}
+
 		inline lcd_controller& controller() { return *m_controller; }
 		inline timer_ptr	   timer() { return m_timer; }
 
 	private:
-		lcd_controller_ptr m_controller;
-		timer_ptr		   m_timer;
-		std::thread		   m_scheduler_thread;
-		std::atomic<bool>  m_exit_flag;
+		lcd_controller_ptr		m_controller;
+		timer_ptr				m_timer;
+		std::thread				m_scheduler_thread;
+		std::atomic<bool>		m_exit_flag;
+		std::condition_variable m_condition_variable;
+		std::mutex				m_mutex;
 	};
 
 	BOOST_AUTO_TEST_SUITE(lcd_logic_test_suite)
@@ -83,21 +94,19 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(print_symbol_test)
 	{
 		test_framework framework;
-		// 1s real = 1000us simulated
-		framework.set_prescaler(.001f);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.wait_for(std::chrono::microseconds(40));
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(0), 'a');
 	}
 
 	BOOST_AUTO_TEST_CASE(write_ddram_timing_test)
 	{
 		test_framework framework;
-		// 1s real = 1000us simulated
-		framework.set_prescaler(.001f);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
@@ -108,18 +117,18 @@ namespace lcd
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(1), 0);
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), true);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		framework.wait_for(std::chrono::microseconds(20));
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), true);
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(0), 0);
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(1), 0);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		framework.wait_for(std::chrono::microseconds(20));
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), false);
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(0), 'a');
 
 		framework.command(true, false, 'b');
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), true);
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.wait_for(std::chrono::microseconds(40));
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(1), 'b');
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), false);
 	}
@@ -127,31 +136,29 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(set_ddram_address)
 	{
 		test_framework framework;
-		// 1s real = 1000us simulated
-		framework.set_prescaler(.001f);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(false, false, 0x85);
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.wait_for(std::chrono::microseconds(40));
 		framework.command(false, true, 0);
 		BOOST_CHECK_EQUAL(framework.read_bus(), 0x05);
 		framework.command(true, false, 'a');
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.wait_for(std::chrono::microseconds(40));
 		BOOST_CHECK_EQUAL(framework.controller().symbol_at_ddram(0x05), 'a');
 	}
 
 	BOOST_AUTO_TEST_CASE(busy_flag)
 	{
 		test_framework framework;
-		// 1s real = 1000us simulated
-		framework.set_prescaler(.001f);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), true);
 		framework.command(false, true, 0);
 		BOOST_CHECK_EQUAL(framework.read_bus(), 0x80);
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		framework.wait_for(std::chrono::microseconds(40));
 		BOOST_CHECK_EQUAL(framework.controller().is_busy(), false);
 		framework.command(false, true, 0);
 		BOOST_CHECK_EQUAL(framework.read_bus(), 0x01);
