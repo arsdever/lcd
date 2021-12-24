@@ -94,7 +94,7 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(print_symbol_test)
 	{
 		test_framework framework;
-		framework.set_prescaler(1e-6);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
@@ -106,7 +106,7 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(write_ddram_timing_test)
 	{
 		test_framework framework;
-		framework.set_prescaler(1e-6);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
@@ -136,7 +136,7 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(set_ddram_address)
 	{
 		test_framework framework;
-		framework.set_prescaler(1e-6);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(false, false, 0x85);
@@ -151,7 +151,7 @@ namespace lcd
 	BOOST_AUTO_TEST_CASE(busy_flag)
 	{
 		test_framework framework;
-		framework.set_prescaler(1e-6);
+		framework.set_prescaler(1e-9);
 		framework.start();
 
 		framework.command(true, false, 'a');
