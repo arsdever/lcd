@@ -7,10 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
-      use_cache:
-        description: 'Indicates whether or not to use cached packages'
-        required: true
-        default: 'true'
+      update_coverage:
+        description: 'Update the coverage when the build is finished'
+        required: false
+        default: false
         type: choice
         options:
         - true
@@ -121,7 +121,7 @@ jobs:
 
     - name: Collect code coverage report
       id: generate_coverage_report
-      if: runner.os == 'Linux' && matrix.configuration == 'release' && github.ref == 'refs/heads/main'
+      if: runner.os == 'Linux' && matrix.configuration == 'release' && (github.ref == 'refs/heads/main' || github.events.inputs.update_coverage == 'true')
       run: lcov -d ../ -c --exclude=/usr/* --exclude=*/vcpkg/* -o report.info
 
     - name: Upload coverage report
