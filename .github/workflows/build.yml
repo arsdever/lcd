@@ -7,10 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
-      use_cache:
-        description: 'Indicates whether or not to use cached packages'
-        required: true
-        default: 'true'
+      update_coverage:
+        description: 'Update the coverage when the build is finished'
+        required: false
+        default: false
         type: choice
         options:
         - true
@@ -69,7 +69,8 @@ jobs:
         build-essential
         gcc-10
         g++-10
-        cpp-10 &&
+        cpp-10
+        lcov &&
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
 
     - name: Try restore vcpkg cache
@@ -110,9 +111,26 @@ jobs:
         -DCMAKE_INSTALL_PREFIX:PATH="${{ github.workspace }}/build/install/${{ matrix.configuration }}_${{ matrix.platrofm }}"
         -DCMAKE_TOOLCHAIN_FILE="${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake"
         -DBUILD_TESTS=ON
+        -DCOVERAGE_REPORT=ON
 
     - name: Build solution
       run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.configuration }} -j4
 
     - name: Run tests
       run: ctest -j4 --test-dir ${{ github.workspace }}/build --output-on-failure -C ${{ matrix.configuration }}
+
+    - name: Collect code coverage report
+      id: generate_coverage_report
+      if: runner.os == 'Linux' && matrix.configuration == 'release' && (github.ref == 'refs/heads/main' || github.events.inputs.update_coverage == 'true')
+      run: lcov -d ../ -c --exclude=/usr/* --exclude=*/vcpkg/* -o report.info
+
+    - name: Upload coverage report
+      if: steps.generate_coverage_report.outcome == 'success'
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: report.info
+        flags: unittests
+        name: lcd
+        fail_ci_if_error: false
+        verbose: true
