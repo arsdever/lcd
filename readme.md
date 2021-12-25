@@ -1,6 +1,7 @@
 ﻿# LCD simulator
 
 ![Build](https://github.com/arsdever/lcd/actions/workflows/build.yml/badge.svg)
+[![codecov](https://codecov.io/gh/arsdever/lcd/branch/main/graph/badge.svg?token=PW02I9CTIL)](https://codecov.io/gh/arsdever/lcd)
 
 This repository contains the source code of the LCD simulator, which, at some
 point, will become a plugin project for the microcontroller simulator. It
